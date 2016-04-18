@@ -76,7 +76,7 @@ public class MainFragment extends Fragment {
         mSocket.on("stop typing", onStopTyping);
         mSocket.connect();
 
-        //startSignIn();
+        startSignIn();
     }
 
     @Override
@@ -250,6 +250,9 @@ public class MainFragment extends Fragment {
 
     private void leave() {
         mUsername = null;
+
+        mSocket.emit("userDisconnected");
+
         mSocket.disconnect();
         mSocket.connect();
         startSignIn();

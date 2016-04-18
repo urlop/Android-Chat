@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.2.3'
+        classpath 'com.android.tools.build:gradle:2.0.0'
     }
 }
 apply plugin: 'com.android.application'
@@ -39,4 +39,10 @@ dependencies {
     compile ('io.socket:socket.io-client:0.7.0') {
         exclude group: 'org.json', module: 'json'
     }
+
+    compile 'com.google.code.gson:gson:2.2.4'
+
+    compile 'com.squareup.retrofit:retrofit:1.9.0'
+    compile 'com.squareup.okhttp:okhttp-urlconnection:2.4.0'
+    compile 'com.squareup.okhttp:okhttp:2.4.0'
 }
