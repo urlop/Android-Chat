@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -64,6 +65,7 @@ public class LoginActivity extends Activity {
         });
 
         mSocket.on("login", onLogin);
+        mSocket.connect();
     }
 
     @Override
@@ -99,26 +101,30 @@ public class LoginActivity extends Activity {
         Log.i("LoginActivity", " mSocket="+mSocket.id());
         // perform the user login attempt.
         mSocket.emit("add user", username);
-        mSocket.emit("store client info", username);
+//        mSocket.emit("store client info", username);
     }
 
     private Emitter.Listener onLogin = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
+
+            int numUsers = 0;
+
             JSONObject data = (JSONObject) args[0];
+            JsonParser jsonParser = new JsonParser();
+            JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
+            String users = gsonObject.getAsJsonArray("users").toString();
 
-            int numUsers;
-            try {
-                numUsers = data.getInt("numUsers");
-            } catch (JSONException e) {
-                return;
-            }
+            Log.d("holy", ""+users);
+            numUsers = gsonObject.get("numUsers").getAsInt();
 
-            Intent intent = new Intent();
+
+            Intent intent = new Intent(getApplicationContext(), FriendsActivity.class);
             intent.putExtra("username", mUsername);
             intent.putExtra("numUsers", numUsers);
-            setResult(RESULT_OK, intent);
+            intent.putExtra("friendsList", users);
             finish();
+            startActivity(intent);
         }
     };
 }

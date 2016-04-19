@@ -76,9 +76,10 @@ public class MainFragment extends Fragment {
         mSocket.on("typing", onTyping);
         mSocket.on("stop typing", onStopTyping);
         mSocket.on("message room", onMessageRoom);
-        mSocket.connect();
 
-        startSignIn();
+        mUsername = ((MainActivity)getActivity()).getmUsername();
+
+//        startSignIn();
     }
 
     @Override
@@ -152,44 +153,12 @@ public class MainFragment extends Fragment {
                 attemptSend();
             }
         });
-    }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (Activity.RESULT_OK != resultCode) {
-            getActivity().finish();
-            return;
-        }
-
-        mUsername = data.getStringExtra("username");
-        int numUsers = data.getIntExtra("numUsers", 1);
 
         addLog(getResources().getString(R.string.message_welcome));
-        addParticipantsLog(numUsers);
+        addParticipantsLog(((MainActivity)getActivity()).getNumUsers());
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        inflater.inflate(R.menu.menu_main, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_leave) {
-            leave();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     private void addLog(String message) {
         mMessages.add(new Message.Builder(Message.TYPE_LOG)
@@ -227,6 +196,7 @@ public class MainFragment extends Fragment {
     }
 
     private void attemptSend() {
+        Log.d("aaaa","aaa "+mUsername);
         if (null == mUsername) return;
         if (!mSocket.connected()) return;
 
@@ -242,15 +212,17 @@ public class MainFragment extends Fragment {
         addMessage(mUsername, message);
 
         // perform the sending message attempt.
+        Log.d("aaaa","antes1 "+mUsername);
         mSocket.emit("new message", message);
-        mSocket.emit("send message", "This is a trap",1);
+        Log.d("aaaa","adespues2 "+mUsername);
+        mSocket.emit("send message", "This is a trap",mUsername);
     }
 
-    private void startSignIn() {
-        mUsername = null;
-        Intent intent = new Intent(getActivity(), LoginActivity.class);
-        startActivityForResult(intent, REQUEST_LOGIN);
-    }
+//    private void startSignIn() {
+//        mUsername = null;
+//        Intent intent = new Intent(getActivity(), LoginActivity.class);
+//        startActivityForResult(intent, REQUEST_LOGIN);
+//    }
 
     private void leave() {
         mUsername = null;
@@ -259,7 +231,7 @@ public class MainFragment extends Fragment {
 
         mSocket.disconnect();
         mSocket.connect();
-        startSignIn();
+//        startSignIn();
     }
 
     private void scrollToBottom() {
