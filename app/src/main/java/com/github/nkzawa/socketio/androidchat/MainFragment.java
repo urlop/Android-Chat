@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -74,6 +75,7 @@ public class MainFragment extends Fragment {
         mSocket.on("user left", onUserLeft);
         mSocket.on("typing", onTyping);
         mSocket.on("stop typing", onStopTyping);
+        mSocket.on("message room", onMessageRoom);
         mSocket.connect();
 
         startSignIn();
@@ -97,6 +99,7 @@ public class MainFragment extends Fragment {
         mSocket.off("user left", onUserLeft);
         mSocket.off("typing", onTyping);
         mSocket.off("stop typing", onStopTyping);
+        mSocket.off("message room", onMessageRoom);
     }
 
     @Override
@@ -240,6 +243,7 @@ public class MainFragment extends Fragment {
 
         // perform the sending message attempt.
         mSocket.emit("new message", message);
+        mSocket.emit("send message", "This is a trap",1);
     }
 
     private void startSignIn() {
@@ -378,6 +382,27 @@ public class MainFragment extends Fragment {
                         return;
                     }
                     removeTyping(username);
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onMessageRoom = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d("Main", "onMessageRoom.data="+args[0]);
+                    //JSONObject data = (JSONObject) args[0];
+
+                    /*String username;
+                    try {
+                        username = data.getString("username");
+                    } catch (JSONException e) {
+                        return;
+                    }
+                    removeTyping(username);*/
                 }
             });
         }

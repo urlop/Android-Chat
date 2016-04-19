@@ -99,6 +99,7 @@ public class LoginActivity extends Activity {
         Log.i("LoginActivity", " mSocket="+mSocket.id());
         // perform the user login attempt.
         mSocket.emit("add user", username);
+        mSocket.emit("store client info", username);
     }
 
     private Emitter.Listener onLogin = new Emitter.Listener() {
