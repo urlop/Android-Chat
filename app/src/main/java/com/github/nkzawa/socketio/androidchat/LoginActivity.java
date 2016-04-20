@@ -32,14 +32,14 @@ public class LoginActivity extends Activity {
     private EditText mUsernameView;
 
     private String mUsername;
-
+    private PreferencesManager mPreferences;
     private Socket mSocket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
+        mPreferences = PreferencesManager.getInstance(this);
         ChatApplication app = (ChatApplication) getApplication();
         mSocket = app.getSocket();
 
@@ -120,7 +120,7 @@ public class LoginActivity extends Activity {
 
 
             Intent intent = new Intent(getApplicationContext(), FriendsActivity.class);
-            intent.putExtra("username", mUsername);
+            mPreferences.saveUser(mUsername,mUsername);
             intent.putExtra("numUsers", numUsers);
             intent.putExtra("friendsList", users);
             finish();

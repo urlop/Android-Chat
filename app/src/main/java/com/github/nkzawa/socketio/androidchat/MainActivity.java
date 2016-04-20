@@ -6,8 +6,9 @@ import android.support.v7.app.ActionBarActivity;
 
 public class MainActivity extends ActionBarActivity {
 
-    String mUsername;
+    String receiverName;
     int numUsers;
+    private PreferencesManager mPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -15,11 +16,12 @@ public class MainActivity extends ActionBarActivity {
 
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
-            mUsername = ""+extras.getInt("username");
+            receiverName = ""+extras.getInt("receiverName");
             numUsers = extras.getInt("numUsers", 0);
         }
 
 
+        mPreferences = PreferencesManager.getInstance(this);
         setContentView(R.layout.activity_main);
     }
 
@@ -31,11 +33,11 @@ public class MainActivity extends ActionBarActivity {
         this.numUsers = numUsers;
     }
 
-    public String getmUsername() {
-        return mUsername;
+    public String getReceiverName() {
+        return receiverName;
     }
 
-    public void setmUsername(String mUsername) {
-        this.mUsername = mUsername;
+    public void setReceiverName(String receiverName) {
+        this.receiverName = receiverName;
     }
 }

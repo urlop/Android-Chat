@@ -48,7 +48,7 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, MainActivity.class);
-                intent.putExtra("username", user.getId());
+                intent.putExtra("receiverName", user.getId());
                 intent.putExtra("numUsers", context.numUsers);
                 context.startActivity(intent);
                 context.finish();

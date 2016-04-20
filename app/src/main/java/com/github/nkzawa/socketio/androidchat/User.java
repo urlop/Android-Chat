@@ -13,14 +13,14 @@ import java.util.List;
  */
 public class User {
 
-    private int userId;
+    private String userId;
     private String name;
 
-    public int getId() {
+    public String getId() {
         return userId;
     }
 
-    public void setId(int userId) {
+    public void setId(String userId) {
         this.userId = userId;
     }
 
@@ -37,10 +37,10 @@ public class User {
     }
 
     public static class Builder {
-        private final int mId;
+        private final String mId;
         private String mName;
 
-        public Builder(int id) {
+        public Builder(String id) {
             mId = id;
         }
 
@@ -60,7 +60,7 @@ public class User {
     public static User parseUser(JsonObject responseObject) {
 
         Builder userBuilder;
-        userBuilder = new Builder(responseObject.get("userId").getAsInt());
+        userBuilder = new Builder(responseObject.get("userId").getAsString());
 
         if (responseObject.has("name") && !responseObject.get("name").isJsonNull()) {
             userBuilder.name(responseObject.get("name").getAsString());

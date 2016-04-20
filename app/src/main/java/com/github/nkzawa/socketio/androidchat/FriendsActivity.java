@@ -1,11 +1,13 @@
 package com.github.nkzawa.socketio.androidchat;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -21,8 +23,8 @@ public class FriendsActivity extends ActionBarActivity {
 
     RecyclerView rv_friends;
     List<User> friendsUser = new ArrayList<>();
-    String mUsername;
     int numUsers;
+    Button btn_create_group;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,11 +45,8 @@ public class FriendsActivity extends ActionBarActivity {
                 friendsUser.add(user);
             }
 
-            mUsername = "";
 
             numUsers =  extras.getInt("numUsers");
-            mUsername = extras.getString("username");
-
         }
 
         setupView();
@@ -63,6 +62,15 @@ public class FriendsActivity extends ActionBarActivity {
         FriendsAdapter adapter = new FriendsAdapter(this, friendsUser);
         rv_friends.setAdapter(adapter);
 
+        btn_create_group = (Button)findViewById(R.id.btn_create_group);
+
+        btn_create_group.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), CreateGroupActivity.class);
+                startActivity(intent);
+            }
+        });
 
     }
 }

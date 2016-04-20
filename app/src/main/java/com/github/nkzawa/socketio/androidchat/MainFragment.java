@@ -48,7 +48,9 @@ public class MainFragment extends Fragment {
     private boolean mTyping = false;
     private Handler mTypingHandler = new Handler();
     private String mUsername;
+    private String receiverName;
     private Socket mSocket;
+    private PreferencesManager mPreferences;
 
     public MainFragment() {
         super();
@@ -65,7 +67,7 @@ public class MainFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         setHasOptionsMenu(true);
-
+        mPreferences = PreferencesManager.getInstance(getActivity());
         ChatApplication app = (ChatApplication) getActivity().getApplication();
         mSocket = app.getSocket();
         mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
@@ -76,8 +78,10 @@ public class MainFragment extends Fragment {
         mSocket.on("typing", onTyping);
         mSocket.on("stop typing", onStopTyping);
         mSocket.on("message room", onMessageRoom);
+        mSocket.off("message sent", onMessageSent);
 
-        mUsername = ((MainActivity)getActivity()).getmUsername();
+        mUsername = mPreferences.getUserId();
+        receiverName = ((MainActivity)getActivity()).getReceiverName();
 
 //        startSignIn();
     }
@@ -101,6 +105,7 @@ public class MainFragment extends Fragment {
         mSocket.off("typing", onTyping);
         mSocket.off("stop typing", onStopTyping);
         mSocket.off("message room", onMessageRoom);
+        mSocket.off("message sent", onMessageSent);
     }
 
     @Override
@@ -196,7 +201,6 @@ public class MainFragment extends Fragment {
     }
 
     private void attemptSend() {
-        Log.d("aaaa","aaa "+mUsername);
         if (null == mUsername) return;
         if (!mSocket.connected()) return;
 
@@ -212,10 +216,10 @@ public class MainFragment extends Fragment {
         addMessage(mUsername, message);
 
         // perform the sending message attempt.
-        Log.d("aaaa","antes1 "+mUsername);
+        Log.d("aaaa","antes1 "+receiverName);
         mSocket.emit("new message", message);
-        Log.d("aaaa","adespues2 "+mUsername);
-        mSocket.emit("send message", "This is a trap",mUsername);
+        Log.d("aaaa","adespues2 "+receiverName);
+        mSocket.emit("send message", "This is a trap",receiverName);
     }
 
 //    private void startSignIn() {
@@ -252,6 +256,29 @@ public class MainFragment extends Fragment {
     };
 
     private Emitter.Listener onNewMessage = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    String username;
+                    String message;
+                    try {
+                        username = data.getString("username");
+                        message = data.getString("message");
+                    } catch (JSONException e) {
+                        return;
+                    }
+
+                    removeTyping(username);
+                    addMessage(username, message);
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onMessageSent = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
             getActivity().runOnUiThread(new Runnable() {
@@ -360,6 +387,29 @@ public class MainFragment extends Fragment {
     };
 
     private Emitter.Listener onMessageRoom = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    String username;
+                    String message;
+                    try {
+                        username = data.getString("username");
+                        message = data.getString("message");
+                    } catch (JSONException e) {
+                        return;
+                    }
+
+                    removeTyping(username);
+                    addMessage(username, message);
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onMessageOneOne = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
             getActivity().runOnUiThread(new Runnable() {
