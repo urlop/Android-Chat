@@ -1,7 +1,6 @@
-package com.github.nkzawa.socketio.androidchat;
+package com.github.nkzawa.socketio.androidchat.Chat;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -10,12 +9,8 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -23,6 +18,11 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.github.nkzawa.socketio.androidchat.Models.Message;
+import com.github.nkzawa.socketio.androidchat.PreferencesManager;
+import com.github.nkzawa.socketio.androidchat.R;
+
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import org.json.JSONException;
@@ -48,7 +48,8 @@ public class MainFragment extends Fragment {
     private boolean mTyping = false;
     private Handler mTypingHandler = new Handler();
     private String mUsername;
-    private String receiverName;
+    protected String receiverName;
+    protected String messageToSend;
     public Socket mSocket;
     private PreferencesManager mPreferences;
 
@@ -76,12 +77,9 @@ public class MainFragment extends Fragment {
         mSocket.on("user left", onUserLeft);
         mSocket.on("typing", onTyping);
         mSocket.on("stop typing", onStopTyping);
-//        mSocket.on("message room", onMessageRoom);
 
         mUsername = mPreferences.getUserId();
         receiverName = ((MainActivity)getActivity()).getReceiverName();
-
-//        startSignIn();
     }
 
     @Override
@@ -102,7 +100,6 @@ public class MainFragment extends Fragment {
         mSocket.off("typing", onTyping);
         mSocket.off("stop typing", onStopTyping);
 
-//        mSocket.off("message room", onMessageRoom);
     }
 
     @Override
@@ -197,25 +194,23 @@ public class MainFragment extends Fragment {
         }
     }
 
-    private void attemptSend() {
+    protected void attemptSend() {
         if (null == mUsername) return;
         if (!mSocket.connected()) return;
 
         mTyping = false;
 
-        String message = mInputMessageView.getText().toString().trim();
-        if (TextUtils.isEmpty(message)) {
+        messageToSend = mInputMessageView.getText().toString().trim();
+        if (TextUtils.isEmpty(messageToSend)) {
             mInputMessageView.requestFocus();
             return;
         }
 
         mInputMessageView.setText("");
-        addMessage(mUsername, message);
+        addMessage(mUsername, messageToSend);
 
         // perform the sending message attempt.
-        Log.d("aaaa","antes1 "+receiverName);
-        Log.d("aaaa","adespues2 "+receiverName);
-        mSocket.emit("send message", message,receiverName);
+
     }
 
 //    private void startSignIn() {
@@ -338,28 +333,7 @@ public class MainFragment extends Fragment {
     };
 
 
-//    private Emitter.Listener onMessageRoom = new Emitter.Listener() {
-//        @Override
-//        public void call(final Object... args) {
-//            getActivity().runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    JSONObject data = (JSONObject) args[0];
-//                    String username;
-//                    String message;
-//                    try {
-//                        username = data.getString("username");
-//                        message = data.getString("message");
-//                    } catch (JSONException e) {
-//                        return;
-//                    }
-//
-//                    removeTyping(username);
-//                    addMessage(username, message);
-//                }
-//            });
-//        }
-//    };
+
 
 
     private Runnable onTypingTimeout = new Runnable() {

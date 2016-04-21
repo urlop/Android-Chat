@@ -1,7 +1,6 @@
-package com.github.nkzawa.socketio.androidchat;
+package com.github.nkzawa.socketio.androidchat.Authentication;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -14,13 +13,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
+import com.github.nkzawa.socketio.androidchat.Chat.ChatApplication;
+import com.github.nkzawa.socketio.androidchat.HomeView.Friends.FriendsActivity;
+import com.github.nkzawa.socketio.androidchat.PreferencesManager;
+import com.github.nkzawa.socketio.androidchat.R;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
-import org.json.JSONException;
+
 import org.json.JSONObject;
 
 

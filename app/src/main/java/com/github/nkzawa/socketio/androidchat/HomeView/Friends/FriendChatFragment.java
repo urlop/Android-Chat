@@ -1,12 +1,13 @@
-package com.github.nkzawa.socketio.androidchat;
+package com.github.nkzawa.socketio.androidchat.HomeView.Friends;
 
 import android.os.Bundle;
 import android.util.Log;
 
+import com.github.nkzawa.socketio.androidchat.Chat.MainFragment;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
 /**
@@ -57,6 +58,13 @@ public class FriendChatFragment extends MainFragment {
             });
         }
     };
+
+
+    @Override
+    protected void attemptSend(){
+        super.attemptSend();
+        mSocket.emit("send message", messageToSend,receiverName);
+    }
 
 
 }

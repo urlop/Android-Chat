@@ -1,6 +1,5 @@
-package com.github.nkzawa.socketio.androidchat;
+package com.github.nkzawa.socketio.androidchat.HomeView.Friends;
 
-import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,6 +7,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.github.nkzawa.socketio.androidchat.Constants;
+import com.github.nkzawa.socketio.androidchat.Chat.MainActivity;
+import com.github.nkzawa.socketio.androidchat.R;
+import com.github.nkzawa.socketio.androidchat.Models.User;
 
 import java.util.List;
 
@@ -50,6 +54,7 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
                 Intent intent = new Intent(context, MainActivity.class);
                 intent.putExtra("receiverName", user.getId());
                 intent.putExtra("numUsers", context.numUsers);
+                intent.putExtra("typeChat", Constants.USER_CHAT);
                 context.startActivity(intent);
                 context.finish();
             }

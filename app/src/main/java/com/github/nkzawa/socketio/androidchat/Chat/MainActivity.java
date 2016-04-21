@@ -1,4 +1,4 @@
-package com.github.nkzawa.socketio.androidchat;
+package com.github.nkzawa.socketio.androidchat.Chat;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -6,11 +6,17 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 
+import com.github.nkzawa.socketio.androidchat.Constants;
+import com.github.nkzawa.socketio.androidchat.HomeView.Friends.FriendChatFragment;
+import com.github.nkzawa.socketio.androidchat.PreferencesManager;
+import com.github.nkzawa.socketio.androidchat.R;
+
 
 public class MainActivity extends ActionBarActivity {
 
-    String receiverName;
-    int numUsers;
+    private String receiverName;
+    private int numUsers;
+    private String typeChat;
     private PreferencesManager mPreferences;
 
     @Override
@@ -21,14 +27,19 @@ public class MainActivity extends ActionBarActivity {
         if(extras != null) {
             receiverName = ""+extras.getString("receiverName");
             numUsers = extras.getInt("numUsers", 0);
+            typeChat = extras.getString("typeChat");
         }
 
 
         mPreferences = PreferencesManager.getInstance(this);
         setContentView(R.layout.activity_main);
 
-
-        Fragment fragment = new FriendChatFragment();
+        Fragment fragment = null;
+        if(typeChat.equals(Constants.USER_CHAT)){
+            fragment = new FriendChatFragment();
+        }else {
+            fragment = new GroupChatFragment();
+        }
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.event_form_container, fragment);

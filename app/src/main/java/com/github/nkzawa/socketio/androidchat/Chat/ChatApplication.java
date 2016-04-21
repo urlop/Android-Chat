@@ -1,6 +1,9 @@
-package com.github.nkzawa.socketio.androidchat;
+package com.github.nkzawa.socketio.androidchat.Chat;
 
 import android.app.Application;
+
+import com.github.nkzawa.socketio.androidchat.Constants;
+
 import io.socket.client.IO;
 import io.socket.client.Socket;
 

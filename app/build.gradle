@@ -23,9 +23,20 @@ android {
         versionName "1.0"
     }
     buildTypes {
-        release {
+        def baseUrl
+        debug {
+            baseUrl = "http://services2.tektonlabs.com/projects/9tribe/lockedin_web/dev/public"
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField "boolean", "REPORT_CRASHES", "false"
+            buildConfigField "String", "BASE_URL", "\"$baseUrl\""
+        }
+        release {
+            baseUrl = ""
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField "boolean", "REPORT_CRASHES", "true"
+            buildConfigField "String", "BASE_URL", "\"$baseUrl\""
         }
     }
     productFlavors {
