@@ -76,7 +76,6 @@ public class MainFragment extends Fragment {
         mSocket.on("user left", onUserLeft);
         mSocket.on("typing", onTyping);
         mSocket.on("stop typing", onStopTyping);
-        mSocket.on("message sent", onMessageSent);
 //        mSocket.on("message room", onMessageRoom);
 
         mUsername = mPreferences.getUserId();
@@ -102,7 +101,6 @@ public class MainFragment extends Fragment {
         mSocket.off("user left", onUserLeft);
         mSocket.off("typing", onTyping);
         mSocket.off("stop typing", onStopTyping);
-        mSocket.off("message sent", onMessageSent);
 
 //        mSocket.off("message room", onMessageRoom);
     }
@@ -334,32 +332,6 @@ public class MainFragment extends Fragment {
                         return;
                     }
                     removeTyping(username);
-                }
-            });
-        }
-    };
-
-    private Emitter.Listener onMessageSent = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-
-            Log.d("aaaa","antes1 "+args[0]);
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    String username;
-                    String message;
-                    try {
-                        Log.d("aaaa","antes1 "+args[0]);
-                        username = data.getString("userId");
-                        message = data.getString("message");
-                    } catch (JSONException e) {
-                        return;
-                    }
-
-                    removeTyping(username);
-                    addMessage(username, message);
                 }
             });
         }
