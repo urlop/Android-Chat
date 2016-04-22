@@ -1,21 +1,36 @@
 package com.github.nkzawa.socketio.androidchat.Models;
 
 import com.google.gson.JsonObject;
+import com.google.gson.annotations.SerializedName;
+
+import java.io.Serializable;
 
 /**
  * Created by rubymobile on 19/04/16.
  */
-public class User {
+public class User implements Serializable{
 
-    private String userId;
+    @SerializedName("id")
+    private int id;
+    @SerializedName("name")
     private String name;
+    @SerializedName("socket_id")
+    private String socket_id;
 
-    public String getId() {
-        return userId;
+    public int getId() {
+        return id;
     }
 
-    public void setId(String userId) {
-        this.userId = userId;
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getSocket_id() {
+        return socket_id;
+    }
+
+    public void setSocket_id(String socket_id) {
+        this.socket_id = socket_id;
     }
 
     public String getName() {
@@ -31,10 +46,11 @@ public class User {
     }
 
     public static class Builder {
-        private final String mId;
+        private int mId;
         private String mName;
+        private String mSocket_id;
 
-        public Builder(String id) {
+        public Builder(int id) {
             mId = id;
         }
 
@@ -43,10 +59,16 @@ public class User {
             return this;
         }
 
+        public Builder sockedId(String sockedId) {
+            mSocket_id = sockedId;
+            return this;
+        }
+
         public User build() {
             User user = new User();
             user.setId(mId);
             user.setName(mName);
+            user.setSocket_id(mSocket_id);
             return user;
         }
     }
@@ -54,10 +76,14 @@ public class User {
     public static User parseUser(JsonObject responseObject) {
 
         Builder userBuilder;
-        userBuilder = new Builder(responseObject.get("userId").getAsString());
+        userBuilder = new Builder(responseObject.get("userId").getAsInt());
 
         if (responseObject.has("name") && !responseObject.get("name").isJsonNull()) {
             userBuilder.name(responseObject.get("name").getAsString());
+        }
+
+        if (responseObject.has("socket_id") && !responseObject.get("socket_id").isJsonNull()) {
+            userBuilder.name(responseObject.get("socket_id").getAsString());
         }
 
 

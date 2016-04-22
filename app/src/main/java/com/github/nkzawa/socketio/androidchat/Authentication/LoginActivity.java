@@ -17,11 +17,17 @@ import com.github.nkzawa.socketio.androidchat.Chat.ChatApplication;
 import com.github.nkzawa.socketio.androidchat.HomeView.Friends.FriendsActivity;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
+import com.github.nkzawa.socketio.androidchat.retrofit.RestClient;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.squareup.okhttp.Call;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 import org.json.JSONObject;
 
@@ -32,10 +38,12 @@ import org.json.JSONObject;
 public class LoginActivity extends Activity {
 
     private EditText mUsernameView;
-
+    private TextView tv_singup;
     private String mUsername;
     private PreferencesManager mPreferences;
     private Socket mSocket;
+    private RestClient restClient;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +52,7 @@ public class LoginActivity extends Activity {
         mPreferences = PreferencesManager.getInstance(this);
         ChatApplication app = (ChatApplication) getApplication();
         mSocket = app.getSocket();
+        restClient = new RestClient();
 
         // Set up the login form.
         mUsernameView = (EditText) findViewById(R.id.username_input);
@@ -66,15 +75,18 @@ public class LoginActivity extends Activity {
             }
         });
 
-        mSocket.on("login", onLogin);
-        mSocket.connect();
+
+        setupView();
+        setupActions();
+//        mSocket.on("login", onLogin);
+//        mSocket.connect();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
 
-        mSocket.off("login", onLogin);
+//        mSocket.off("login", onLogin);
     }
 
     /**
@@ -82,6 +94,22 @@ public class LoginActivity extends Activity {
      * If there are form errors (invalid username, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
+
+    private void setupView(){
+        tv_singup = (TextView)findViewById(R.id.tv_singup);
+    }
+
+    private void setupActions(){
+        tv_singup.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), CreateUserActivity.class);
+                finish();
+                startActivity(intent);
+            }
+        });
+    }
+
     private void attemptLogin() {
         // Reset errors.
         mUsernameView.setError(null);
@@ -101,34 +129,59 @@ public class LoginActivity extends Activity {
         mUsername = username;
 
         Log.i("LoginActivity", " mSocket="+mSocket.id());
+        loginUser(mUsername,mSocket.id());
         // perform the user login attempt.
-        mSocket.emit("add user", username);
+//        mSocket.emit("add user", username);
 //        mSocket.emit("store client info", username);
     }
 
-    private Emitter.Listener onLogin = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
+//    private Emitter.Listener onLogin = new Emitter.Listener() {
+//        @Override
+//        public void call(Object... args) {
+//
+//            int numUsers = 0;
+//
+//            JSONObject data = (JSONObject) args[0];
+//            JsonParser jsonParser = new JsonParser();
+//            JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
+//            String users = gsonObject.getAsJsonArray("users").toString();
+//
+//            Log.d("holy", ""+users);
+//            numUsers = gsonObject.get("numUsers").getAsInt();
+//
+//
+//            Intent intent = new Intent(getApplicationContext(), FriendsActivity.class);
+//            mPreferences.saveUser(mUsername,mUsername);
+//            intent.putExtra("numUsers", numUsers);
+//            intent.putExtra("friendsList", users);
+//            finish();
+//            startActivity(intent);
+//        }
+//    };
 
-            int numUsers = 0;
+    private void loginUser(String username , String sockedId){
 
-            JSONObject data = (JSONObject) args[0];
-            JsonParser jsonParser = new JsonParser();
-            JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
-            String users = gsonObject.getAsJsonArray("users").toString();
-
-            Log.d("holy", ""+users);
-            numUsers = gsonObject.get("numUsers").getAsInt();
+        JsonObject user = new JsonObject();
+        JsonObject attributes = new JsonObject();
+        attributes.addProperty("name", username);
+        attributes.addProperty("socked_id", sockedId);
+        user.add("user",attributes);
 
 
-            Intent intent = new Intent(getApplicationContext(), FriendsActivity.class);
-            mPreferences.saveUser(mUsername,mUsername);
-            intent.putExtra("numUsers", numUsers);
-            intent.putExtra("friendsList", users);
-            finish();
-            startActivity(intent);
-        }
-    };
+        restClient.getWebservices().loginUser(user, new Callback<JsonObject>() {
+            @Override
+            public void success(JsonObject jsonObject, Response response) {
+                JsonObject me = jsonObject.get("me").getAsJsonObject();
+                String users = jsonObject.get("users").getAsJsonArray().toString();
+                String rooms = jsonObject.get("rooms").getAsJsonArray().toString();
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+
+            }
+        });
+    }
 }
 
 

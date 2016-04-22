@@ -30,7 +30,7 @@
             android:theme="@style/Theme.AppCompat"
             android:windowSoftInputMode="adjustResize|stateVisible" />
         <activity android:name=".HomeView.Groups.CreateGroupActivity" />
-        <activity android:name=".Authentication.ActivityCreateUser"></activity>
+        <activity android:name=".Authentication.CreateUserActivity"></activity>
     </application>
 
 </manifest>

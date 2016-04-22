@@ -3,6 +3,7 @@ package com.github.nkzawa.socketio.androidchat.retrofit;
 import com.google.gson.JsonObject;
 
 import retrofit.Callback;
+import retrofit.http.Body;
 import retrofit.http.Field;
 import retrofit.http.FormUrlEncoded;
 import retrofit.http.POST;
@@ -12,8 +13,11 @@ import retrofit.http.POST;
  */
 public interface ChatServices {
 
-    @FormUrlEncoded
+
     @POST(Urls.LOGIN_URL)
-    void loginUser(@Field("email") String name, @Field("password") String password, Callback<JsonObject> callback);
+    void loginUser(@Body Object body , Callback<JsonObject> callback);
+
+    @POST(Urls.CREATE_USER)
+    void createUser(@Body Object body, Callback<JsonObject> callback);
 
 }

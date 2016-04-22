@@ -1,4 +1,4 @@
-package com.github.nkzawa.socketio.androidchat.HomeView.Friends;
+package com.github.nkzawa.socketio.androidchat.Chat;
 
 import android.os.Bundle;
 import android.util.Log;

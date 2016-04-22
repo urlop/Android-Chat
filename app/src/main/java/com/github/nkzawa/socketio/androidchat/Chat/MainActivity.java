@@ -7,7 +7,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 
 import com.github.nkzawa.socketio.androidchat.Constants;
-import com.github.nkzawa.socketio.androidchat.HomeView.Friends.FriendChatFragment;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
 

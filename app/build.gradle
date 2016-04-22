@@ -25,7 +25,7 @@ android {
     buildTypes {
         def baseUrl
         debug {
-            baseUrl = "http://services2.tektonlabs.com/projects/9tribe/lockedin_web/dev/public"
+            baseUrl = "https://mychatws.herokuapp.com"
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField "boolean", "REPORT_CRASHES", "false"
