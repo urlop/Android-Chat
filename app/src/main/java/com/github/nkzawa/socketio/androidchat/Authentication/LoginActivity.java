@@ -14,22 +14,16 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.github.nkzawa.socketio.androidchat.Chat.ChatApplication;
-import com.github.nkzawa.socketio.androidchat.HomeView.Friends.FriendsActivity;
+import com.github.nkzawa.socketio.androidchat.HomeView.HomeActivity;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
 import com.github.nkzawa.socketio.androidchat.retrofit.RestClient;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.squareup.okhttp.Call;
 
 import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
-
-import org.json.JSONObject;
 
 
 /**
@@ -150,7 +144,7 @@ public class LoginActivity extends Activity {
 //            numUsers = gsonObject.get("numUsers").getAsInt();
 //
 //
-//            Intent intent = new Intent(getApplicationContext(), FriendsActivity.class);
+//            Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
 //            mPreferences.saveUser(mUsername,mUsername);
 //            intent.putExtra("numUsers", numUsers);
 //            intent.putExtra("friendsList", users);
@@ -174,6 +168,16 @@ public class LoginActivity extends Activity {
                 JsonObject me = jsonObject.get("me").getAsJsonObject();
                 String users = jsonObject.get("users").getAsJsonArray().toString();
                 String rooms = jsonObject.get("rooms").getAsJsonArray().toString();
+
+            Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+            String name = me.get("name").getAsString();
+            int userId = me.get("id").getAsInt();
+            mPreferences.saveUser(userId,name);
+            intent.putExtra("usersList", users);
+            intent.putExtra("groupsList", rooms);
+            finish();
+            startActivity(intent);
+
             }
 
             @Override

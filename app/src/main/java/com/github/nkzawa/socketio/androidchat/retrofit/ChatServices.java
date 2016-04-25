@@ -4,8 +4,6 @@ import com.google.gson.JsonObject;
 
 import retrofit.Callback;
 import retrofit.http.Body;
-import retrofit.http.Field;
-import retrofit.http.FormUrlEncoded;
 import retrofit.http.POST;
 
 /**
@@ -19,5 +17,8 @@ public interface ChatServices {
 
     @POST(Urls.CREATE_USER)
     void createUser(@Body Object body, Callback<JsonObject> callback);
+
+    @POST(Urls.CREATE_GROUP)
+    void createGroup(@Body Object body, Callback<JsonObject> callback);
 
 }

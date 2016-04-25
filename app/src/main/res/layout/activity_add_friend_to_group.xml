@@ -7,18 +7,8 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".HomeView.HomeActivity"
-    android:background="#FFFFFF"
+    tools:context=".Chat.Actions.AddFriendToGroupActivity"
     android:orientation="vertical">
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Create Group"
-        android:id="@+id/btn_create_group"
-        android:layout_above="@+id/rv_friends"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_friends"

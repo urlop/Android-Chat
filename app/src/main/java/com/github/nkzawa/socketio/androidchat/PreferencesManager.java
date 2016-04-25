@@ -34,16 +34,21 @@ public class PreferencesManager {
         return self;
     }
 
-    public void saveUser(String userId, String userName){
+    public void saveUser(int userId, String userName){
         SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putString(USER_ID, userId);
+        editor.putInt(USER_ID, userId);
         editor.putString(USER_NAME, userName);
         editor.apply();
     }
 
-    public String getUserId(){
-        String userId = mPreferences.getString(USER_ID, "");
+    public int getUserId(){
+        int userId = mPreferences.getInt(USER_ID, 0);
         return  userId;
+    }
+
+    public String getUserName(){
+        String getUserName = mPreferences.getString(USER_NAME, "");
+        return  getUserName;
     }
 
 

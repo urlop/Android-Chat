@@ -48,7 +48,7 @@ public class MainFragment extends Fragment {
     private boolean mTyping = false;
     private Handler mTypingHandler = new Handler();
     private String mUsername;
-    protected String receiverName;
+    protected int receiverId;
     protected String messageToSend;
     public Socket mSocket;
     private PreferencesManager mPreferences;
@@ -78,8 +78,9 @@ public class MainFragment extends Fragment {
         mSocket.on("typing", onTyping);
         mSocket.on("stop typing", onStopTyping);
 
-        mUsername = mPreferences.getUserId();
-        receiverName = ((MainActivity)getActivity()).getReceiverName();
+
+        mUsername = mPreferences.getUserName();
+        receiverId = ((MainActivity)getActivity()).getReceiverId();
     }
 
     @Override

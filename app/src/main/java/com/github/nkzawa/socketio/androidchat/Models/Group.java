@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 /**
  * Created by rubymobile on 22/04/16.
  */
-public class Room {
+public class Group {
 
     int id;
     String name;
@@ -71,20 +71,20 @@ public class Room {
             return this;
         }
 
-        public Room build() {
-            Room room = new Room();
-            room.setId(mId);
-            room.setName(mName);
-            room.setSocked_id(mSocked_id);
-            room.setOwner_id(mOwner_id);
-            return room;
+        public Group build() {
+            Group group = new Group();
+            group.setId(mId);
+            group.setName(mName);
+            group.setSocked_id(mSocked_id);
+            group.setOwner_id(mOwner_id);
+            return group;
         }
     }
 
-    public static Room parseRoom(JsonObject responseObject) {
+    public static Group parseGroup(JsonObject responseObject) {
 
         Builder roomBuilder;
-        roomBuilder = new Builder(responseObject.get("socked_id").getAsInt());
+        roomBuilder = new Builder(responseObject.get("id").getAsInt());
 
         if (responseObject.has("name") && !responseObject.get("name").isJsonNull()) {
             roomBuilder.name(responseObject.get("name").getAsString());

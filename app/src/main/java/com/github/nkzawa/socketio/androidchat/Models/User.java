@@ -2,27 +2,25 @@ package com.github.nkzawa.socketio.androidchat.Models;
 
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import com.orm.SugarRecord;
 
 import java.io.Serializable;
 
 /**
  * Created by rubymobile on 19/04/16.
  */
-public class User implements Serializable{
+public class User extends SugarRecord{
 
-    @SerializedName("id")
-    private int id;
-    @SerializedName("name")
+    private int userId;
     private String name;
-    @SerializedName("socket_id")
     private String socket_id;
 
-    public int getId() {
-        return id;
+    public int getUserId() {
+        return userId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setUserId(int id) {
+        this.userId = userId;
     }
 
     public String getSocket_id() {
@@ -66,7 +64,7 @@ public class User implements Serializable{
 
         public User build() {
             User user = new User();
-            user.setId(mId);
+            user.setUserId(mId);
             user.setName(mName);
             user.setSocket_id(mSocket_id);
             return user;
@@ -76,14 +74,14 @@ public class User implements Serializable{
     public static User parseUser(JsonObject responseObject) {
 
         Builder userBuilder;
-        userBuilder = new Builder(responseObject.get("userId").getAsInt());
+        userBuilder = new Builder(responseObject.get("id").getAsInt());
 
         if (responseObject.has("name") && !responseObject.get("name").isJsonNull()) {
             userBuilder.name(responseObject.get("name").getAsString());
         }
 
         if (responseObject.has("socket_id") && !responseObject.get("socket_id").isJsonNull()) {
-            userBuilder.name(responseObject.get("socket_id").getAsString());
+            userBuilder.sockedId(responseObject.get("socket_id").getAsString());
         }
 
 

@@ -13,7 +13,7 @@ import com.github.nkzawa.socketio.androidchat.R;
 
 public class MainActivity extends ActionBarActivity {
 
-    private String receiverName;
+    private int receiverId;
     private int numUsers;
     private String typeChat;
     private PreferencesManager mPreferences;
@@ -24,7 +24,7 @@ public class MainActivity extends ActionBarActivity {
 
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
-            receiverName = ""+extras.getString("receiverName");
+            receiverId = extras.getInt("receiverId");
             numUsers = extras.getInt("numUsers", 0);
             typeChat = extras.getString("typeChat");
         }
@@ -54,11 +54,7 @@ public class MainActivity extends ActionBarActivity {
         this.numUsers = numUsers;
     }
 
-    public String getReceiverName() {
-        return receiverName;
-    }
-
-    public void setReceiverName(String receiverName) {
-        this.receiverName = receiverName;
+    public int getReceiverId() {
+        return receiverId;
     }
 }

@@ -3,7 +3,9 @@ package com.github.nkzawa.socketio.androidchat.Chat;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.github.nkzawa.socketio.androidchat.Chat.MainFragment;
+import com.github.nkzawa.socketio.androidchat.Models.User;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,7 +48,11 @@ public class FriendChatFragment extends MainFragment {
                     String message;
                     try {
                         Log.d("aaaa","antes1 "+args[0]);
-                        username = data.getString("userId");
+                        JsonParser jsonParser = new JsonParser();
+                        JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
+                        JsonObject userJsonObj = gsonObject.getAsJsonObject("user");
+                        User user = User.parseUser(userJsonObj);
+                        username = user.getName();
                         message = data.getString("message");
                     } catch (JSONException e) {
                         return;
@@ -63,7 +69,8 @@ public class FriendChatFragment extends MainFragment {
     @Override
     protected void attemptSend(){
         super.attemptSend();
-        mSocket.emit("send message", messageToSend,receiverName);
+        Log.d("see enviaa", "tu :"+messageToSend + "-" + receiverId+ "-" + "user");
+        mSocket.emit("send message", messageToSend, receiverId, "user");
     }
 
 
