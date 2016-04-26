@@ -1,23 +1,24 @@
 package com.github.nkzawa.socketio.androidchat.Models;
 
 import com.google.gson.JsonObject;
+import com.orm.SugarRecord;
 
 /**
  * Created by rubymobile on 22/04/16.
  */
-public class Group {
+public class Room extends SugarRecord {
 
-    int id;
+    int roomId;
     String name;
     String socked_id;
     int owner_id;
 
-    public int getId() {
-        return id;
+    public int getRoomId() {
+        return roomId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setRoomId(int roomId) {
+        this.roomId = roomId;
     }
 
     public String getName() {
@@ -71,17 +72,17 @@ public class Group {
             return this;
         }
 
-        public Group build() {
-            Group group = new Group();
-            group.setId(mId);
-            group.setName(mName);
-            group.setSocked_id(mSocked_id);
-            group.setOwner_id(mOwner_id);
-            return group;
+        public Room build() {
+            Room room = new Room();
+            room.setRoomId(mId);
+            room.setName(mName);
+            room.setSocked_id(mSocked_id);
+            room.setOwner_id(mOwner_id);
+            return room;
         }
     }
 
-    public static Group parseGroup(JsonObject responseObject) {
+    public static Room parseGroup(JsonObject responseObject) {
 
         Builder roomBuilder;
         roomBuilder = new Builder(responseObject.get("id").getAsInt());

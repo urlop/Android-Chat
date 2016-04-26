@@ -1,16 +1,13 @@
 package com.github.nkzawa.socketio.androidchat.HomeView.Groups;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.github.nkzawa.socketio.androidchat.Chat.ChatApplication;
-import com.github.nkzawa.socketio.androidchat.Constants;
-import com.github.nkzawa.socketio.androidchat.Chat.MainActivity;
+import com.github.nkzawa.socketio.androidchat.ChatApplication;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
 import com.github.nkzawa.socketio.androidchat.retrofit.RestClient;

@@ -10,12 +10,11 @@ import android.widget.TextView;
 
 import com.github.nkzawa.socketio.androidchat.Constants;
 import com.github.nkzawa.socketio.androidchat.Chat.MainActivity;
-import com.github.nkzawa.socketio.androidchat.Models.Group;
+import com.github.nkzawa.socketio.androidchat.Models.Room;
 import com.github.nkzawa.socketio.androidchat.R;
 import com.github.nkzawa.socketio.androidchat.Models.User;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by rubymobile on 19/04/16.
@@ -74,26 +73,24 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     intent.putExtra("numUsers", context.numUsers);
                     intent.putExtra("typeChat", Constants.USER_CHAT);
                     context.startActivity(intent);
-                    context.finish();
                 }
             });
 
 
         }else{
             GroupViewHolder groupViewHolder = (GroupViewHolder)viewHolder;
-            final Group group = (Group)mContacts.get(position);
+            final Room room = (Room)mContacts.get(position);
 
-            groupViewHolder.setGroupname(""+group.getName());
+            groupViewHolder.setGroupname(""+ room.getName());
 
             groupViewHolder.ll_group.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(context, MainActivity.class);
-                    intent.putExtra("receiverId", group.getId());
+                    intent.putExtra("receiverId", room.getId());
                     intent.putExtra("numUsers", context.numUsers);
                     intent.putExtra("typeChat", Constants.GROUP_CHAT);
                     context.startActivity(intent);
-                    context.finish();
                 }
             });
         }

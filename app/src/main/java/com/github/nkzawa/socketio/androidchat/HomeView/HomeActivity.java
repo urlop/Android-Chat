@@ -8,20 +8,14 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
-import com.github.nkzawa.socketio.androidchat.Chat.ChatApplication;
+import com.github.nkzawa.socketio.androidchat.ChatApplication;
 import com.github.nkzawa.socketio.androidchat.HomeView.Groups.CreateGroupActivity;
-import com.github.nkzawa.socketio.androidchat.Models.Group;
+import com.github.nkzawa.socketio.androidchat.Models.Room;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
 import com.github.nkzawa.socketio.androidchat.Models.User;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,8 +58,6 @@ public class HomeActivity extends ActionBarActivity {
         final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         rv_friends.setLayoutManager(layoutManager);
-        HomeAdapter adapter = new HomeAdapter(this, contactsList);
-        rv_friends.setAdapter(adapter);
 
         btn_create_group = (Button)findViewById(R.id.btn_create_group);
 
@@ -76,7 +68,7 @@ public class HomeActivity extends ActionBarActivity {
                 startActivity(intent);
             }
         });
-
+        setContacts();
     }
 
     public void connectToServer(){
@@ -90,9 +82,8 @@ public class HomeActivity extends ActionBarActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d("user activated", " es : "+args[0]);
-                    Log.d("el socket es :", "ooo 2 : "+mSocket.id());
-                    setContacts();
+                    Toast.makeText(getApplicationContext(), "Conectado", Toast.LENGTH_SHORT).show();
+
                 }
             });
         }
@@ -114,29 +105,12 @@ public class HomeActivity extends ActionBarActivity {
     };
 
     private void setContacts(){
-        if(extras != null) {
-            String friends = extras.getString("usersList");
-            JsonParser jsonParser = new JsonParser();
-            JsonArray jsonArray = null;
-            jsonArray = (JsonArray)jsonParser.parse(friends);
+        List<User> friends = User.listAll(User.class);
+        List<Room> rooms = Room.listAll(Room.class);
+        contactsList.addAll(friends);
+        contactsList.addAll(rooms);
 
-            for (JsonElement jsonElement : jsonArray) {
-                JsonObject jsonObject = jsonElement.getAsJsonObject();
-                User user = User.parseUser(jsonObject);
-                contactsList.add(user);
-            }
-
-            String groups = extras.getString("groupsList");
-            jsonArray = (JsonArray)jsonParser.parse(groups);
-
-            for (JsonElement jsonElement : jsonArray) {
-                JsonObject jsonObject = jsonElement.getAsJsonObject();
-                Group group = Group.parseGroup(jsonObject);
-                contactsList.add(group);
-            }
-
-
-            numUsers =  extras.getInt("numUsers");
-        }
+        HomeAdapter adapter = new HomeAdapter(this, contactsList);
+        rv_friends.setAdapter(adapter);
     }
 }

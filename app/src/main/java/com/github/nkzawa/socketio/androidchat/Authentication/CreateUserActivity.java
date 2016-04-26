@@ -1,17 +1,15 @@
 package com.github.nkzawa.socketio.androidchat.Authentication;
 
 import android.app.Activity;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.github.nkzawa.socketio.androidchat.Chat.ChatApplication;
+import com.github.nkzawa.socketio.androidchat.ChatApplication;
 import com.github.nkzawa.socketio.androidchat.R;
 import com.github.nkzawa.socketio.androidchat.retrofit.RestClient;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import io.socket.client.Socket;

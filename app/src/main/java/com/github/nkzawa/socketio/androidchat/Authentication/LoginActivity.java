@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -13,14 +12,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.github.nkzawa.socketio.androidchat.Chat.ChatApplication;
 import com.github.nkzawa.socketio.androidchat.HomeView.HomeActivity;
+import com.github.nkzawa.socketio.androidchat.Models.Room;
+import com.github.nkzawa.socketio.androidchat.Models.User;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
 import com.github.nkzawa.socketio.androidchat.retrofit.RestClient;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
-import io.socket.client.Socket;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -35,7 +37,6 @@ public class LoginActivity extends Activity {
     private TextView tv_singup;
     private String mUsername;
     private PreferencesManager mPreferences;
-    private Socket mSocket;
     private RestClient restClient;
 
 
@@ -44,12 +45,36 @@ public class LoginActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         mPreferences = PreferencesManager.getInstance(this);
-        ChatApplication app = (ChatApplication) getApplication();
-        mSocket = app.getSocket();
         restClient = new RestClient();
 
+        if(mPreferences.getUserName() != null && !mPreferences.getUserName().isEmpty()){
+            Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+            startActivity(intent);
+            finish();
+        }
+
+        setupView();
+        setupActions();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    /**
+     * Attempts to sign in the account specified by the login form.
+     * If there are form errors (invalid username, missing fields, etc.), the
+     * errors are presented and no actual login attempt is made.
+     */
+
+    private void setupView(){
+        tv_singup = (TextView)findViewById(R.id.tv_singup);
         // Set up the login form.
         mUsernameView = (EditText) findViewById(R.id.username_input);
+    }
+
+    private void setupActions(){
         mUsernameView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -69,31 +94,6 @@ public class LoginActivity extends Activity {
             }
         });
 
-
-        setupView();
-        setupActions();
-//        mSocket.on("login", onLogin);
-//        mSocket.connect();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-//        mSocket.off("login", onLogin);
-    }
-
-    /**
-     * Attempts to sign in the account specified by the login form.
-     * If there are form errors (invalid username, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
-     */
-
-    private void setupView(){
-        tv_singup = (TextView)findViewById(R.id.tv_singup);
-    }
-
-    private void setupActions(){
         tv_singup.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -122,45 +122,17 @@ public class LoginActivity extends Activity {
 
         mUsername = username;
 
-        Log.i("LoginActivity", " mSocket="+mSocket.id());
-        loginUser(mUsername,mSocket.id());
-        // perform the user login attempt.
-//        mSocket.emit("add user", username);
-//        mSocket.emit("store client info", username);
+        loginUser(mUsername);
+
     }
 
-//    private Emitter.Listener onLogin = new Emitter.Listener() {
-//        @Override
-//        public void call(Object... args) {
-//
-//            int numUsers = 0;
-//
-//            JSONObject data = (JSONObject) args[0];
-//            JsonParser jsonParser = new JsonParser();
-//            JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
-//            String users = gsonObject.getAsJsonArray("users").toString();
-//
-//            Log.d("holy", ""+users);
-//            numUsers = gsonObject.get("numUsers").getAsInt();
-//
-//
-//            Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
-//            mPreferences.saveUser(mUsername,mUsername);
-//            intent.putExtra("numUsers", numUsers);
-//            intent.putExtra("friendsList", users);
-//            finish();
-//            startActivity(intent);
-//        }
-//    };
 
-    private void loginUser(String username , String sockedId){
+    private void loginUser(String username){
 
         JsonObject user = new JsonObject();
         JsonObject attributes = new JsonObject();
         attributes.addProperty("name", username);
-        attributes.addProperty("socked_id", sockedId);
         user.add("user",attributes);
-
 
         restClient.getWebservices().loginUser(user, new Callback<JsonObject>() {
             @Override
@@ -169,14 +141,32 @@ public class LoginActivity extends Activity {
                 String users = jsonObject.get("users").getAsJsonArray().toString();
                 String rooms = jsonObject.get("rooms").getAsJsonArray().toString();
 
-            Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
             String name = me.get("name").getAsString();
             int userId = me.get("id").getAsInt();
             mPreferences.saveUser(userId,name);
-            intent.putExtra("usersList", users);
-            intent.putExtra("groupsList", rooms);
-            finish();
+
+            JsonParser jsonParser = new JsonParser();
+            JsonArray jsonArray = null;
+            jsonArray = (JsonArray)jsonParser.parse(users);
+
+            for (JsonElement jsonElement : jsonArray) {
+                JsonObject jsonObjectUser = jsonElement.getAsJsonObject();
+                User user = User.parseUser(jsonObjectUser);
+                user.save();
+            }
+
+            jsonArray = (JsonArray)jsonParser.parse(rooms);
+
+            for (JsonElement jsonElement : jsonArray) {
+                JsonObject jsonObjectRoom = jsonElement.getAsJsonObject();
+                Room room = Room.parseGroup(jsonObjectRoom);
+                room.save();
+            }
+
+            Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
             startActivity(intent);
+            finish();
+
 
             }
 
