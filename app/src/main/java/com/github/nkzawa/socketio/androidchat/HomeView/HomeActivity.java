@@ -22,6 +22,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import io.socket.client.Socket;
@@ -40,6 +41,7 @@ public class HomeActivity extends ActionBarActivity {
     private PreferencesManager mPreferences;
     Bundle extras;
     private RestClient restClient;
+
 
 
 
@@ -156,6 +158,11 @@ public class HomeActivity extends ActionBarActivity {
                     room.save();
                 }
 
+
+//                //                Date lastDate = mPreferences.getLastUserInfoUpdate();
+//
+//                Date currentDate = new Date();
+//                mPreferences.saveLastUserInfoUpdate(currentDate.getTime());
 
             }
 

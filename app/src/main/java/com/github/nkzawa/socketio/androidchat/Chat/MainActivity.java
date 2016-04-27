@@ -18,6 +18,10 @@ public class MainActivity extends ActionBarActivity {
     private String typeChat;
     private PreferencesManager mPreferences;
 
+    public String getTypeChat() {
+        return typeChat;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

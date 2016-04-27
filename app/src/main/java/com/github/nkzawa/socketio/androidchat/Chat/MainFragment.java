@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +21,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.nkzawa.socketio.androidchat.ChatApplication;
+import com.github.nkzawa.socketio.androidchat.Constants;
+import com.github.nkzawa.socketio.androidchat.HomeView.HomeActivity;
 import com.github.nkzawa.socketio.androidchat.Models.Message;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
@@ -53,6 +56,7 @@ public class MainFragment extends Fragment {
     protected String messageToSend;
     public Socket mSocket;
     private PreferencesManager mPreferences;
+    private MainActivity mainActivity;
 
     public MainFragment() {
         super();
@@ -69,6 +73,7 @@ public class MainFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         setHasOptionsMenu(true);
+        mainActivity = (MainActivity) getActivity();
         mPreferences = PreferencesManager.getInstance(getActivity());
         ChatApplication app = (ChatApplication) getActivity().getApplication();
         mSocket = app.getSocket();
@@ -135,7 +140,12 @@ public class MainFragment extends Fragment {
 
                 if (!mTyping) {
                     mTyping = true;
-                    mSocket.emit("typing");
+                    if(mainActivity.getTypeChat().equals(Constants.USER_CHAT)){
+                        mSocket.emit("typing",receiverId,"user");
+                    }else{
+                        mSocket.emit("typing",receiverId,"room");
+                    }
+
                 }
 
                 mTypingHandler.removeCallbacks(onTypingTimeout);
@@ -302,6 +312,7 @@ public class MainFragment extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    Log.d("aaaa","aaaa"+args[0]);
                     JSONObject data = (JSONObject) args[0];
                     String username;
                     try {
