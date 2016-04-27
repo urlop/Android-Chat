@@ -9,8 +9,14 @@ import android.widget.TextView;
 
 import com.github.nkzawa.socketio.androidchat.Models.User;
 import com.github.nkzawa.socketio.androidchat.R;
+import com.github.nkzawa.socketio.androidchat.retrofit.RestClient;
+import com.google.gson.JsonObject;
 
 import java.util.List;
+
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 /**
  * Created by rubymobile on 25/04/16.
@@ -18,9 +24,15 @@ import java.util.List;
 public class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<User> mContacts;
+    private RestClient restClient;
+    private int groupId;
 
-    public FriendsAdapter(List<User> contacts) {
-        mContacts = contacts;}
+
+    public FriendsAdapter(List<User> contacts, int groupId) {
+        mContacts = contacts;
+        restClient = new RestClient();
+        this.groupId =groupId;
+    }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -36,14 +48,14 @@ public class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
          UserViewHolder userViewHolder = (UserViewHolder)viewHolder;
-         User user = mContacts.get(position);
+         final User user = mContacts.get(position);
 
         userViewHolder.setUsername(""+user.getName());
 
         userViewHolder.ll_user.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                addFriendToGroup(user.getUserId());
             }
         });
 
@@ -73,6 +85,21 @@ public class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             mUsernameView.setText(username);
         }
 
+    }
+
+    public void addFriendToGroup(int userId){
+        restClient.getWebservices().addUserToRoom(groupId, userId, new Callback<JsonObject>() {
+            @Override
+            public void success(JsonObject jsonObject, Response response) {
+
+
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+
+            }
+        });
     }
 
 

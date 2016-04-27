@@ -1,7 +1,14 @@
 package com.github.nkzawa.socketio.androidchat.Models;
 
+import com.github.nkzawa.socketio.androidchat.BuildConfig;
+import com.github.nkzawa.socketio.androidchat.PreferencesManager;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.orm.SugarRecord;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by rubymobile on 22/04/16.
@@ -12,6 +19,8 @@ public class Room extends SugarRecord {
     String name;
     String socked_id;
     int owner_id;
+    List<User> members;
+
 
     public int getRoomId() {
         return roomId;
@@ -45,12 +54,20 @@ public class Room extends SugarRecord {
         this.socked_id = socked_id;
     }
 
+    public List<User> getMembers() {
+        return members;
+    }
+
+    public void setMembers(List<User> members) {
+        this.members = members;
+    }
 
     public static class Builder {
         private int mId;
         private String mName;
         private String mSocked_id;
         private int mOwner_id;
+        private List<User> mMembers;
 
 
         public Builder(int id) {
@@ -72,17 +89,23 @@ public class Room extends SugarRecord {
             return this;
         }
 
+        public Builder members(List<User> members){
+            mMembers = members;
+            return this;
+        }
+
         public Room build() {
             Room room = new Room();
             room.setRoomId(mId);
             room.setName(mName);
             room.setSocked_id(mSocked_id);
             room.setOwner_id(mOwner_id);
+            room.setMembers(mMembers);
             return room;
         }
     }
 
-    public static Room parseGroup(JsonObject responseObject) {
+    public static Room parseGroup(JsonObject responseObject, PreferencesManager preferencesManager) {
 
         Builder roomBuilder;
         roomBuilder = new Builder(responseObject.get("id").getAsInt());
@@ -98,6 +121,30 @@ public class Room extends SugarRecord {
         if (responseObject.has("owner_id") && !responseObject.get("owner_id").isJsonNull()) {
             roomBuilder.owner(responseObject.get("owner_id").getAsInt());
         }
+
+        if (responseObject.has("users") && !responseObject.get("users").isJsonNull()) {
+            List<User> members = new ArrayList<>();
+
+            JsonArray jsonArray = responseObject.get("users").getAsJsonArray();
+            for (JsonElement jsonElement : jsonArray) {
+                JsonObject jsonObjectUser = jsonElement.getAsJsonObject();
+                User user = User.parseUser(jsonObjectUser);
+                List<User> users = User.find(User.class, "user_id = ?", ""+user.getUserId());
+                if(users.isEmpty() && user.getUserId() != preferencesManager.getUserId()){
+                    user.save();
+                    members.add(user);
+                }else if(user.getUserId() != preferencesManager.getUserId()){
+                    user = users.get(0);
+                    members.add(user);
+                }
+
+            }
+
+            roomBuilder.members(members);
+
+        }
+
+
 
 
         return roomBuilder.build();

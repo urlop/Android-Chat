@@ -19,7 +19,7 @@ public class User extends SugarRecord{
         return userId;
     }
 
-    public void setUserId(int id) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
 

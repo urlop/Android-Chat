@@ -69,7 +69,7 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(context, MainActivity.class);
-                    intent.putExtra("receiverId", user.getId());
+                    intent.putExtra("receiverId", user.getUserId());
                     intent.putExtra("numUsers", context.numUsers);
                     intent.putExtra("typeChat", Constants.USER_CHAT);
                     context.startActivity(intent);
@@ -87,7 +87,7 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(context, MainActivity.class);
-                    intent.putExtra("receiverId", room.getId());
+                    intent.putExtra("receiverId", room.getRoomId());
                     intent.putExtra("numUsers", context.numUsers);
                     intent.putExtra("typeChat", Constants.GROUP_CHAT);
                     context.startActivity(intent);

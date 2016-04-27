@@ -83,6 +83,7 @@ public class GroupChatFragment extends MainFragment {
 
         if (id == R.id.action_add_friend) {
             Intent i = new Intent(getActivity(), AddFriendToGroupActivity.class);
+            i.putExtra("groupId",receiverId);
             startActivity(i);
             return true;
         }

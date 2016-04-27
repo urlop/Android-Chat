@@ -6,6 +6,9 @@ package com.github.nkzawa.socketio.androidchat.retrofit;
 public interface Urls {
     String LOGIN_URL = "/users/login";
     String CREATE_USER = "/users";
+    String GET_USER_ID = "/users/{id}/get_user_info";
 
     String CREATE_GROUP = "/rooms";
+    String ADD_USER_TO_GROUP = "/rooms/{id}/invite";
+    String GET_ROOM_ID = "/rooms/{id}";
 }

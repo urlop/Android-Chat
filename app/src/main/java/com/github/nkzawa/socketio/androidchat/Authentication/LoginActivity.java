@@ -137,17 +137,15 @@ public class LoginActivity extends Activity {
         restClient.getWebservices().loginUser(user, new Callback<JsonObject>() {
             @Override
             public void success(JsonObject jsonObject, Response response) {
+
                 JsonObject me = jsonObject.get("me").getAsJsonObject();
-                String users = jsonObject.get("users").getAsJsonArray().toString();
-                String rooms = jsonObject.get("rooms").getAsJsonArray().toString();
 
             String name = me.get("name").getAsString();
             int userId = me.get("id").getAsInt();
             mPreferences.saveUser(userId,name);
 
-            JsonParser jsonParser = new JsonParser();
             JsonArray jsonArray = null;
-            jsonArray = (JsonArray)jsonParser.parse(users);
+            jsonArray = jsonObject.get("users").getAsJsonArray();
 
             for (JsonElement jsonElement : jsonArray) {
                 JsonObject jsonObjectUser = jsonElement.getAsJsonObject();
@@ -155,11 +153,11 @@ public class LoginActivity extends Activity {
                 user.save();
             }
 
-            jsonArray = (JsonArray)jsonParser.parse(rooms);
+            jsonArray = jsonObject.get("rooms").getAsJsonArray();
 
             for (JsonElement jsonElement : jsonArray) {
                 JsonObject jsonObjectRoom = jsonElement.getAsJsonObject();
-                Room room = Room.parseGroup(jsonObjectRoom);
+                Room room = Room.parseGroup(jsonObjectRoom, mPreferences);
                 room.save();
             }
 

@@ -16,12 +16,19 @@ import com.github.nkzawa.socketio.androidchat.Models.Room;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
 import com.github.nkzawa.socketio.androidchat.Models.User;
+import com.github.nkzawa.socketio.androidchat.retrofit.RestClient;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 public class HomeActivity extends ActionBarActivity {
 
@@ -32,6 +39,8 @@ public class HomeActivity extends ActionBarActivity {
     public Socket mSocket;
     private PreferencesManager mPreferences;
     Bundle extras;
+    private RestClient restClient;
+
 
 
     @Override
@@ -44,11 +53,12 @@ public class HomeActivity extends ActionBarActivity {
         mSocket.connect();
         mSocket.on(Socket.EVENT_CONNECT, onUserIsConnected);
         mSocket.on("activate user", onUserIsActivated);
-
+        restClient = new RestClient();
         extras = getIntent().getExtras();
 
 
         setupView();
+        getUserInfo();
 
     }
 
@@ -112,5 +122,47 @@ public class HomeActivity extends ActionBarActivity {
 
         HomeAdapter adapter = new HomeAdapter(this, contactsList);
         rv_friends.setAdapter(adapter);
+    }
+
+    public void getUserInfo(){
+        restClient.getWebservices().getUserInfo(mPreferences.getUserId(), new Callback<JsonObject>() {
+            @Override
+            public void success(JsonObject jsonObject, Response response) {
+
+                User.deleteAll(User.class);
+                Room.deleteAll(Room.class);
+
+                Log.d("response", "resoibes "+jsonObject.toString());
+                JsonObject me = jsonObject.get("me").getAsJsonObject();
+
+                String name = me.get("name").getAsString();
+                int userId = me.get("id").getAsInt();
+                mPreferences.saveUser(userId,name);
+
+                JsonArray jsonArray = null;
+                jsonArray = jsonObject.get("users").getAsJsonArray();
+
+                for (JsonElement jsonElement : jsonArray) {
+                    JsonObject jsonObjectUser = jsonElement.getAsJsonObject();
+                    User user = User.parseUser(jsonObjectUser);
+                    user.save();
+                }
+
+                jsonArray = jsonObject.get("rooms").getAsJsonArray();
+
+                for (JsonElement jsonElement : jsonArray) {
+                    JsonObject jsonObjectRoom = jsonElement.getAsJsonObject();
+                    Room room = Room.parseGroup(jsonObjectRoom, mPreferences);
+                    room.save();
+                }
+
+
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+
+            }
+        });
     }
 }
