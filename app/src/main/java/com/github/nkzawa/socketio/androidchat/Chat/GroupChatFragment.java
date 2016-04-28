@@ -32,8 +32,6 @@ public class GroupChatFragment extends MainFragment {
     public void onDestroy() {
         super.onDestroy();
         mSocket.off("message sent room", onMessageRoom);
-
-        mSocket.disconnect();
     }
 
 

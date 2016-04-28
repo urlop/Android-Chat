@@ -30,8 +30,6 @@ public class FriendChatFragment extends MainFragment {
     public void onDestroy() {
         super.onDestroy();
         mSocket.off("message sent", onMessageSent);
-
-        mSocket.disconnect();
     }
 
 

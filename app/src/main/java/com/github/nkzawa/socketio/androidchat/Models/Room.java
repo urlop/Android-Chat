@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.orm.SugarRecord;
+import com.orm.dsl.Ignore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,10 @@ public class Room extends SugarRecord {
     String socked_id;
     int owner_id;
     List<User> members;
+
+    // No savedData
+    @Ignore
+    private boolean isTyping= false;
 
 
     public int getRoomId() {
@@ -60,6 +65,14 @@ public class Room extends SugarRecord {
 
     public void setMembers(List<User> members) {
         this.members = members;
+    }
+
+    public boolean isTyping() {
+        return isTyping;
+    }
+
+    public void setTyping(boolean typing) {
+        isTyping = typing;
     }
 
     public static class Builder {

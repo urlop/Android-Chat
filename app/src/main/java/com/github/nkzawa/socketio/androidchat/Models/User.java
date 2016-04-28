@@ -3,6 +3,7 @@ package com.github.nkzawa.socketio.androidchat.Models;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import com.orm.SugarRecord;
+import com.orm.dsl.Ignore;
 
 import java.io.Serializable;
 
@@ -11,9 +12,23 @@ import java.io.Serializable;
  */
 public class User extends SugarRecord{
 
+
+    // Saved data in database
     private int userId;
     private String name;
     private String socket_id;
+
+    // No savedData
+    @Ignore
+    private boolean isTyping= false;
+
+    public boolean isTyping() {
+        return isTyping;
+    }
+
+    public void setTyping(boolean typing) {
+        isTyping = typing;
+    }
 
     public int getUserId() {
         return userId;

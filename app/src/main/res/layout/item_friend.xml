@@ -4,25 +4,31 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="right"
-        android:background="@color/highlighted_text_material_dark"
-        android:id="@+id/ll_user">
+        android:id="@+id/ll_user"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:paddingLeft="20dp">
 
         <TextView
             android:id="@+id/username"
             style="?android:textAppearanceMedium"
-            android:textColor="@color/abc_input_method_navigation_guard"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:textStyle="bold"
             android:text="aaaaaaaaaaaaaa"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp" />
+            android:textColor="@android:color/black" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ty"
+            android:id="@+id/tv_last_message"
+            android:textColor="@android:color/black" />
     </LinearLayout>
 
 </LinearLayout>

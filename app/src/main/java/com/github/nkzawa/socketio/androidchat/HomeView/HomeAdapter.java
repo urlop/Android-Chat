@@ -14,6 +14,7 @@ import com.github.nkzawa.socketio.androidchat.Models.Room;
 import com.github.nkzawa.socketio.androidchat.R;
 import com.github.nkzawa.socketio.androidchat.Models.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,10 +25,16 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final int TYPE_FRIEND = 0;
     private final int TYPE_GROUP = 1;
     private List<Object> mContacts;
+    private List<User> mUsers;
+    private List<Room> mRooms;
     private HomeActivity context;
 
-    public HomeAdapter(HomeActivity context, List<Object> contacts) {
-        mContacts = contacts;
+    public HomeAdapter(HomeActivity context, List<User> users, List<Room> rooms) {
+        mUsers  = users;
+        mRooms = rooms;
+        mContacts = new ArrayList<>();
+        mContacts.addAll(users);
+        mContacts.addAll(rooms);
         this.context = context;
     }
 
@@ -77,6 +84,12 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             });
 
 
+            if(user.isTyping()){
+                userViewHolder.setTyping("esta tipeando");
+            }else{
+                userViewHolder.setTyping("");
+            }
+
         }else{
             GroupViewHolder groupViewHolder = (GroupViewHolder)viewHolder;
             final Room room = (Room)mContacts.get(position);
@@ -93,6 +106,13 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     context.startActivity(intent);
                 }
             });
+
+
+            if(room.isTyping()){
+                groupViewHolder.setTyping("esta tipeando");
+            }else{
+                groupViewHolder.setTyping("");
+            }
         }
 
 
@@ -117,14 +137,39 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     }
 
+    public void setTyping(Object object, boolean isTyping){
+        int itemPosition = 0;
+
+        if(User.class.isInstance(mContacts.get(itemPosition))){
+            for(int i=0 ; i<mUsers.size()-1; i++){
+                if(mUsers.get(i).getUserId() == ((User)object).getUserId()){
+                    itemPosition = i;
+                    ((User)mContacts.get(itemPosition)).setTyping(isTyping);
+                    break;
+                }
+            }
+        }else{
+            for(int i=0 ; i<mRooms.size()-1; i++){
+                if(mRooms.get(i).getRoomId() == ((Room)object).getRoomId()){
+                    itemPosition = mUsers.size()-1+i;
+                    ((Room)mContacts.get(itemPosition)).setTyping(isTyping);
+                    break;
+                }
+            }
+        }
+
+        notifyItemChanged(itemPosition);
+    }
+
     public class UserViewHolder extends RecyclerView.ViewHolder {
-        private TextView mUsernameView;
+        private TextView mUsernameView, tv_last_message;
         private LinearLayout ll_user;
 
         public UserViewHolder(View itemView) {
             super(itemView);
 
             mUsernameView = (TextView) itemView.findViewById(R.id.username);
+            tv_last_message = (TextView) itemView.findViewById(R.id.tv_last_message);
             ll_user = (LinearLayout) itemView.findViewById(R.id.ll_user);
         }
 
@@ -133,15 +178,21 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             mUsernameView.setText(username);
         }
 
+        public void setTyping(String message) {
+            if (null == tv_last_message) return;
+            tv_last_message.setText(message);
+        }
+
     }
 
     public class GroupViewHolder extends RecyclerView.ViewHolder {
-        private TextView mGroupView;
+        private TextView mGroupView, tv_last_message;
         private LinearLayout ll_group;
 
         public GroupViewHolder(View itemView) {
             super(itemView);
 
+            tv_last_message = (TextView) itemView.findViewById(R.id.tv_last_message);
             mGroupView = (TextView) itemView.findViewById(R.id.groupname);
             ll_group = (LinearLayout) itemView.findViewById(R.id.ll_group);
         }
@@ -149,6 +200,11 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         public void setGroupname(String username) {
             if (null == mGroupView) return;
             mGroupView.setText(username);
+        }
+
+        public void setTyping(String message) {
+            if (null == tv_last_message) return;
+            tv_last_message.setText(message);
         }
 
     }

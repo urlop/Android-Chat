@@ -20,6 +20,10 @@ import com.github.nkzawa.socketio.androidchat.retrofit.RestClient;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,7 +45,7 @@ public class HomeActivity extends ActionBarActivity {
     private PreferencesManager mPreferences;
     Bundle extras;
     private RestClient restClient;
-
+    private HomeAdapter homeAdapter;
 
 
 
@@ -53,14 +57,40 @@ public class HomeActivity extends ActionBarActivity {
         ChatApplication app = (ChatApplication)getApplication();
         mSocket = app.getSocket();
         mSocket.connect();
-        mSocket.on(Socket.EVENT_CONNECT, onUserIsConnected);
-        mSocket.on("activate user", onUserIsActivated);
+
         restClient = new RestClient();
         extras = getIntent().getExtras();
 
 
         setupView();
         getUserInfo();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mSocket.on(Socket.EVENT_CONNECT, onUserIsConnected);
+        mSocket.on("activate user", onUserIsActivated);
+        mSocket.on("typing", onTyping);
+        mSocket.on("stop typing", onStopTyping);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mSocket.off(Socket.EVENT_CONNECT_ERROR, onUserIsConnected);
+        mSocket.off("activate user", onUserIsActivated);
+        mSocket.off("typing", onTyping);
+        mSocket.off("stop typing", onStopTyping);
+    }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mSocket.disconnect();
+
 
     }
 
@@ -116,14 +146,65 @@ public class HomeActivity extends ActionBarActivity {
         }
     };
 
+    private Emitter.Listener onTyping = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    JSONObject data = (JSONObject) args[0];
+                    JsonParser jsonParser = new JsonParser();
+                    JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
+
+                    if(gsonObject.has("to")){
+
+                    }else{
+//                        Room room = Room.find(Room.class, "room_id")
+//                        List<User> users = User.find(User.class, "user_id = ?", ""+user.getUserId());
+                    }
+                    String users = gsonObject.getAsJsonArray("users").toString();
+
+                    Log.d("holy", ""+users);
+
+                    Log.d("aaaa","aaaa"+args[0]);
+                    String username;
+                    try {
+                        username = data.getString("username");
+                    } catch (JSONException e) {
+                        return;
+                    }
+//                    homeAdapter.setTyping();
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onStopTyping = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    String username;
+                    try {
+                        username = data.getString("username");
+                    } catch (JSONException e) {
+                        return;
+                    }
+//                    homeAdapter.setTyping();
+                }
+            });
+        }
+    };
+
     private void setContacts(){
         List<User> friends = User.listAll(User.class);
         List<Room> rooms = Room.listAll(Room.class);
-        contactsList.addAll(friends);
-        contactsList.addAll(rooms);
 
-        HomeAdapter adapter = new HomeAdapter(this, contactsList);
-        rv_friends.setAdapter(adapter);
+        homeAdapter = new HomeAdapter(this, friends, rooms);
+        rv_friends.setAdapter(homeAdapter);
     }
 
     public void getUserInfo(){
