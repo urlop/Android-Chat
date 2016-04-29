@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.github.nkzawa.socketio.androidchat.ChatApplication;
 import com.github.nkzawa.socketio.androidchat.HomeView.Groups.CreateGroupActivity;
+import com.github.nkzawa.socketio.androidchat.Models.Message;
 import com.github.nkzawa.socketio.androidchat.Models.Room;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
@@ -152,29 +153,36 @@ public class HomeActivity extends ActionBarActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-
+                    Log.d("typing","aaaa"+args[0]);
                     JSONObject data = (JSONObject) args[0];
                     JsonParser jsonParser = new JsonParser();
                     JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
+                    String messageTyping = "";
+                    Object object = null;
 
                     if(gsonObject.has("to")){
+                        List<Room> room = Room.find(Room.class, "room_id = ?", ""+gsonObject.get("to").getAsInt());
+                        object = room.get(0);
 
+                        String userName= "";
+                        if(gsonObject.has("from")){
+                            JsonObject jsonObjectSender = gsonObject.get("from").getAsJsonObject();
+                            userName = jsonObjectSender.get("name").getAsString();
+                        }
+                        messageTyping = userName + " is typing";
                     }else{
-//                        Room room = Room.find(Room.class, "room_id")
-//                        List<User> users = User.find(User.class, "user_id = ?", ""+user.getUserId());
-                    }
-                    String users = gsonObject.getAsJsonArray("users").toString();
 
-                    Log.d("holy", ""+users);
-
-                    Log.d("aaaa","aaaa"+args[0]);
-                    String username;
-                    try {
-                        username = data.getString("username");
-                    } catch (JSONException e) {
-                        return;
+                        if(gsonObject.has("from")){
+                            JsonObject jsonObjectSender = gsonObject.get("from").getAsJsonObject();
+                            int userId = jsonObjectSender.get("id").getAsInt();
+                            List<User> users = User.find(User.class, "user_id = ?", ""+userId);
+                            object = users.get(0);
+                            messageTyping = "is typing";
+                        }
                     }
-//                    homeAdapter.setTyping();
+
+                    homeAdapter.setTypingMessage(messageTyping);
+                    homeAdapter.setTyping(object,true);
                 }
             });
         }
@@ -186,14 +194,27 @@ public class HomeActivity extends ActionBarActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    Log.d("stop","aaaa"+args[0]);
                     JSONObject data = (JSONObject) args[0];
-                    String username;
-                    try {
-                        username = data.getString("username");
-                    } catch (JSONException e) {
-                        return;
+                    JsonParser jsonParser = new JsonParser();
+                    JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
+                    Object object = null;
+
+                    if(gsonObject.has("to")){
+                        List<Room> room = Room.find(Room.class, "room_id = ?", ""+gsonObject.get("to").getAsInt());
+                        object = room.get(0);
+
+
+
+                    }else{
+                        if(gsonObject.has("from")){
+                            JsonObject jsonObjectSender = gsonObject.get("from").getAsJsonObject();
+                            int userId = jsonObjectSender.get("id").getAsInt();
+                            List<User> users = User.find(User.class, "user_id = ?", ""+userId);
+                            object = users.get(0);
+                        }
                     }
-//                    homeAdapter.setTyping();
+                    homeAdapter.setTyping(object,false);
                 }
             });
         }

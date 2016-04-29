@@ -28,6 +28,7 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<User> mUsers;
     private List<Room> mRooms;
     private HomeActivity context;
+    private String typingMessage = "is typing";
 
     public HomeAdapter(HomeActivity context, List<User> users, List<Room> rooms) {
         mUsers  = users;
@@ -85,7 +86,7 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
 
             if(user.isTyping()){
-                userViewHolder.setTyping("esta tipeando");
+                userViewHolder.setTyping(typingMessage);
             }else{
                 userViewHolder.setTyping("");
             }
@@ -109,7 +110,7 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
 
             if(room.isTyping()){
-                groupViewHolder.setTyping("esta tipeando");
+                groupViewHolder.setTyping(typingMessage);
             }else{
                 groupViewHolder.setTyping("");
             }
@@ -140,7 +141,7 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void setTyping(Object object, boolean isTyping){
         int itemPosition = 0;
 
-        if(User.class.isInstance(mContacts.get(itemPosition))){
+        if(User.class.isInstance(object)){
             for(int i=0 ; i<mUsers.size()-1; i++){
                 if(mUsers.get(i).getUserId() == ((User)object).getUserId()){
                     itemPosition = i;
@@ -151,14 +152,19 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }else{
             for(int i=0 ; i<mRooms.size()-1; i++){
                 if(mRooms.get(i).getRoomId() == ((Room)object).getRoomId()){
-                    itemPosition = mUsers.size()-1+i;
+                    itemPosition = mUsers.size() + i;
                     ((Room)mContacts.get(itemPosition)).setTyping(isTyping);
                     break;
                 }
             }
         }
 
+
         notifyItemChanged(itemPosition);
+    }
+
+    public void setTypingMessage(String typingMessage) {
+        this.typingMessage = typingMessage;
     }
 
     public class UserViewHolder extends RecyclerView.ViewHolder {

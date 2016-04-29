@@ -24,8 +24,12 @@ import com.github.nkzawa.socketio.androidchat.ChatApplication;
 import com.github.nkzawa.socketio.androidchat.Constants;
 import com.github.nkzawa.socketio.androidchat.HomeView.HomeActivity;
 import com.github.nkzawa.socketio.androidchat.Models.Message;
+import com.github.nkzawa.socketio.androidchat.Models.Room;
+import com.github.nkzawa.socketio.androidchat.Models.User;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -103,6 +107,8 @@ public class MainFragment extends Fragment {
         mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
         mSocket.off("user joined", onUserJoined);
         mSocket.off("user left", onUserLeft);
+        mSocket.off("typing", onTyping);
+        mSocket.off("stop typing", onStopTyping);
 
 
     }
@@ -310,15 +316,45 @@ public class MainFragment extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d("aaaa","aaaa"+args[0]);
+
+                    Log.d("typing","aaaa"+args[0]);
                     JSONObject data = (JSONObject) args[0];
-                    String username;
-                    try {
-                        username = data.getString("username");
-                    } catch (JSONException e) {
-                        return;
+                    JsonParser jsonParser = new JsonParser();
+                    JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
+
+                    boolean showInThisChat = false;
+
+                    if(gsonObject.has("to")){
+                        if(mainActivity.getTypeChat().equals(Constants.GROUP_CHAT)){
+                            int roomId = gsonObject.get("to").getAsInt();
+                            if(roomId == receiverId){
+                                showInThisChat = true;
+                            }
+                        }else{
+                            // notification
+                        }
+                    }else{
+                        if(mainActivity.getTypeChat().equals(Constants.USER_CHAT)){
+                            if(gsonObject.has("from")){
+                                JsonObject jsonObjectSender = gsonObject.get("from").getAsJsonObject();
+                                int userId = jsonObjectSender.get("id").getAsInt();
+                                if(userId == receiverId){
+                                    showInThisChat = true;
+                                }
+                            }
+                        }else{
+                            // notification
+                        }
                     }
-                    addTyping(username);
+
+                    if(showInThisChat){
+                        String username = "";
+                        if(gsonObject.has("from")){
+                            JsonObject jsonObjectSender = gsonObject.get("from").getAsJsonObject();
+                            username = jsonObjectSender.get("name").getAsString();
+                        }
+                        addTyping(username);
+                    }
                 }
             });
         }
@@ -330,13 +366,26 @@ public class MainFragment extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+
+                    Log.d("typing","aaaa"+args[0]);
                     JSONObject data = (JSONObject) args[0];
-                    String username;
-                    try {
-                        username = data.getString("username");
-                    } catch (JSONException e) {
-                        return;
+                    JsonParser jsonParser = new JsonParser();
+                    JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
+                    String username = "";
+
+                    if(gsonObject.has("to")){
+                        if(gsonObject.has("from")){
+                            JsonObject jsonObjectSender = gsonObject.get("from").getAsJsonObject();
+                            username = jsonObjectSender.get("name").getAsString();
+                        }
+                    }else{
+
+                        if(gsonObject.has("from")){
+                            JsonObject jsonObjectSender = gsonObject.get("from").getAsJsonObject();
+                            username = jsonObjectSender.get("name").getAsString();
+                        }
                     }
+
                     removeTyping(username);
                 }
             });
@@ -353,7 +402,11 @@ public class MainFragment extends Fragment {
             if (!mTyping) return;
 
             mTyping = false;
-            mSocket.emit("stop typing");
+            if(mainActivity.getTypeChat().equals(Constants.USER_CHAT)){
+                mSocket.emit("stop typing",receiverId,"user");
+            }else{
+                mSocket.emit("stop typing",receiverId,"room");
+            }
         }
     };
 }

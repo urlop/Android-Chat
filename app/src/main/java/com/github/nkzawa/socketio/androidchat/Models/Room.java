@@ -20,7 +20,6 @@ public class Room extends SugarRecord {
     String name;
     String socked_id;
     int owner_id;
-    List<User> members;
 
     // No savedData
     @Ignore
@@ -59,13 +58,6 @@ public class Room extends SugarRecord {
         this.socked_id = socked_id;
     }
 
-    public List<User> getMembers() {
-        return members;
-    }
-
-    public void setMembers(List<User> members) {
-        this.members = members;
-    }
 
     public boolean isTyping() {
         return isTyping;
@@ -102,10 +94,6 @@ public class Room extends SugarRecord {
             return this;
         }
 
-        public Builder members(List<User> members){
-            mMembers = members;
-            return this;
-        }
 
         public Room build() {
             Room room = new Room();
@@ -113,7 +101,6 @@ public class Room extends SugarRecord {
             room.setName(mName);
             room.setSocked_id(mSocked_id);
             room.setOwner_id(mOwner_id);
-            room.setMembers(mMembers);
             return room;
         }
     }
@@ -135,27 +122,27 @@ public class Room extends SugarRecord {
             roomBuilder.owner(responseObject.get("owner_id").getAsInt());
         }
 
-        if (responseObject.has("users") && !responseObject.get("users").isJsonNull()) {
-            List<User> members = new ArrayList<>();
-
-            JsonArray jsonArray = responseObject.get("users").getAsJsonArray();
-            for (JsonElement jsonElement : jsonArray) {
-                JsonObject jsonObjectUser = jsonElement.getAsJsonObject();
-                User user = User.parseUser(jsonObjectUser);
-                List<User> users = User.find(User.class, "user_id = ?", ""+user.getUserId());
-                if(users.isEmpty() && user.getUserId() != preferencesManager.getUserId()){
-                    user.save();
-                    members.add(user);
-                }else if(user.getUserId() != preferencesManager.getUserId()){
-                    user = users.get(0);
-                    members.add(user);
-                }
-
-            }
-
-            roomBuilder.members(members);
-
-        }
+//        if (responseObject.has("users") && !responseObject.get("users").isJsonNull()) {
+//            List<User> members = new ArrayList<>();
+//
+//            JsonArray jsonArray = responseObject.get("users").getAsJsonArray();
+//            for (JsonElement jsonElement : jsonArray) {
+//                JsonObject jsonObjectUser = jsonElement.getAsJsonObject();
+//                User user = User.parseUser(jsonObjectUser);
+//                List<User> users = User.find(User.class, "user_id = ?", ""+user.getUserId());
+//                if(users.isEmpty() && user.getUserId() != preferencesManager.getUserId()){
+//                    user.save();
+//                    members.add(user);
+//                }else if(user.getUserId() != preferencesManager.getUserId()){
+//                    user = users.get(0);
+//                    members.add(user);
+//                }
+//
+//            }
+//
+//            roomBuilder.members(members);
+//
+//        }
 
 
 
