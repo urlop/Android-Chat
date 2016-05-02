@@ -1,5 +1,6 @@
 package com.github.nkzawa.socketio.androidchat.HomeView;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -27,10 +28,10 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<Object> mContacts;
     private List<User> mUsers;
     private List<Room> mRooms;
-    private HomeActivity context;
+    private Activity context;
     private String typingMessage = "is typing";
 
-    public HomeAdapter(HomeActivity context, List<User> users, List<Room> rooms) {
+    public HomeAdapter(Activity context, List<User> users, List<Room> rooms) {
         mUsers  = users;
         mRooms = rooms;
         mContacts = new ArrayList<>();
@@ -78,7 +79,6 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 public void onClick(View v) {
                     Intent intent = new Intent(context, MainActivity.class);
                     intent.putExtra("receiverId", user.getUserId());
-                    intent.putExtra("numUsers", context.numUsers);
                     intent.putExtra("typeChat", Constants.USER_CHAT);
                     context.startActivity(intent);
                 }
@@ -102,7 +102,6 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 public void onClick(View v) {
                     Intent intent = new Intent(context, MainActivity.class);
                     intent.putExtra("receiverId", room.getRoomId());
-                    intent.putExtra("numUsers", context.numUsers);
                     intent.putExtra("typeChat", Constants.GROUP_CHAT);
                     context.startActivity(intent);
                 }
