@@ -18,17 +18,6 @@ public class User extends SugarRecord{
     private String name;
     private String socket_id;
 
-    // No savedData
-    @Ignore
-    private boolean isTyping= false;
-
-    public boolean isTyping() {
-        return isTyping;
-    }
-
-    public void setTyping(boolean typing) {
-        isTyping = typing;
-    }
 
     public int getUserId() {
         return userId;

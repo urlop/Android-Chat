@@ -11,13 +11,12 @@ public class Message extends SugarRecord {
     public static final int TYPE_LOG = 1;
     @Ignore
     public static final int TYPE_ACTION = 2;
-
+    @Ignore
     private int mType;
+
     private String mMessage;
     private String mUsername;
     private Chat chat;
-
-    private Message() {}
 
     public int getType() {
         return mType;

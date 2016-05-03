@@ -1,6 +1,7 @@
 package com.github.nkzawa.socketio.androidchat.Chat;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -12,6 +13,9 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -20,11 +24,11 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.nkzawa.socketio.androidchat.Chat.Actions.AddFriendToGroupActivity;
 import com.github.nkzawa.socketio.androidchat.ChatApplication;
 import com.github.nkzawa.socketio.androidchat.Constants;
-import com.github.nkzawa.socketio.androidchat.HomeView.HomeActivity;
+import com.github.nkzawa.socketio.androidchat.Models.Chat;
 import com.github.nkzawa.socketio.androidchat.Models.Message;
-import com.github.nkzawa.socketio.androidchat.Models.Room;
 import com.github.nkzawa.socketio.androidchat.Models.User;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
@@ -43,7 +47,7 @@ import java.util.List;
 /**
  * A chat fragment containing messages view and input form.
  */
-public class MainFragment extends Fragment {
+public class ChatFragment extends Fragment {
 
     private static final int REQUEST_LOGIN = 0;
 
@@ -60,9 +64,9 @@ public class MainFragment extends Fragment {
     protected String messageToSend;
     public Socket mSocket;
     private PreferencesManager mPreferences;
-    private MainActivity mainActivity;
+    private ChatActivity chatActivity;
 
-    public MainFragment() {
+    public ChatFragment() {
         super();
     }
 
@@ -74,23 +78,27 @@ public class MainFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
+        if(((ChatActivity)getActivity()).getTypeChat().equals(Constants.ROOM_CHAT)){
+            setHasOptionsMenu(true);
+        }
         super.onCreate(savedInstanceState);
 
         setHasOptionsMenu(true);
-        mainActivity = (MainActivity) getActivity();
+        chatActivity = (ChatActivity) getActivity();
         mPreferences = PreferencesManager.getInstance(getActivity());
         ChatApplication app = (ChatApplication) getActivity().getApplication();
         mSocket = app.getSocket();
         mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
         mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        mSocket.on("user joined", onUserJoined);
-        mSocket.on("user left", onUserLeft);
         mSocket.on("typing", onTyping);
         mSocket.on("stop typing", onStopTyping);
+        mSocket.on("message sent", onMessageSent);
+
 
 
         mUsername = mPreferences.getUserName();
-        receiverId = ((MainActivity)getActivity()).getReceiverId();
+        receiverId = ((ChatActivity)getActivity()).getReceiverId();
     }
 
     @Override
@@ -105,11 +113,9 @@ public class MainFragment extends Fragment {
 
         mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
         mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        mSocket.off("user joined", onUserJoined);
-        mSocket.off("user left", onUserLeft);
         mSocket.off("typing", onTyping);
         mSocket.off("stop typing", onStopTyping);
-
+        mSocket.off("message sent", onMessageSent);
 
     }
 
@@ -144,7 +150,7 @@ public class MainFragment extends Fragment {
 
                 if (!mTyping) {
                     mTyping = true;
-                    if(mainActivity.getTypeChat().equals(Constants.USER_CHAT)){
+                    if(chatActivity.getTypeChat().equals(Constants.USER_CHAT)){
                         mSocket.emit("typing",receiverId,"user");
                     }else{
                         mSocket.emit("typing",receiverId,"room");
@@ -171,7 +177,9 @@ public class MainFragment extends Fragment {
 
 
         addLog(getResources().getString(R.string.message_welcome));
-        addParticipantsLog(((MainActivity)getActivity()).getNumUsers());
+
+        Chat chat = Chat.getChat(receiverId,((ChatActivity)getActivity()).getTypeChat());
+
     }
 
 
@@ -226,24 +234,18 @@ public class MainFragment extends Fragment {
         addMessage(mUsername, messageToSend);
 
         // perform the sending message attempt.
+        Log.d("see enviaa", "tu :"+messageToSend + "-" + receiverId+ "-" + "user");
 
+        Message message = new Message.Builder(Message.TYPE_MESSAGE).username(mUsername).message(messageToSend).build();
+        message.save();
+
+        Chat chat = Chat.createChat(receiverId,((ChatActivity)getActivity()).getTypeChat());
+        chat.setLastMessage(message);
+        chat.save();
+        mSocket.emit("send message", messageToSend, receiverId,((ChatActivity)getActivity()).getTypeChat());
     }
 
-//    private void startSignIn() {
-//        mUsername = null;
-//        Intent intent = new Intent(getActivity(), LoginActivity.class);
-//        startActivityForResult(intent, REQUEST_LOGIN);
-//    }
 
-    private void leave() {
-        mUsername = null;
-
-        mSocket.emit("userDisconnected");
-
-        mSocket.disconnect();
-        mSocket.connect();
-//        startSignIn();
-    }
 
     private void scrollToBottom() {
         mMessagesView.scrollToPosition(mAdapter.getItemCount() - 1);
@@ -263,53 +265,6 @@ public class MainFragment extends Fragment {
     };
 
 
-    private Emitter.Listener onUserJoined = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    String username;
-                    int numUsers;
-                    try {
-                        username = data.getString("username");
-                        numUsers = data.getInt("numUsers");
-                    } catch (JSONException e) {
-                        return;
-                    }
-
-                    addLog(getResources().getString(R.string.message_user_joined, username));
-                    addParticipantsLog(numUsers);
-                }
-            });
-        }
-    };
-
-    private Emitter.Listener onUserLeft = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    String username;
-                    int numUsers;
-                    try {
-                        username = data.getString("username");
-                        numUsers = data.getInt("numUsers");
-                    } catch (JSONException e) {
-                        return;
-                    }
-
-                    addLog(getResources().getString(R.string.message_user_left, username));
-                    addParticipantsLog(numUsers);
-                    removeTyping(username);
-                }
-            });
-        }
-    };
-
     private Emitter.Listener onTyping = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
@@ -325,7 +280,7 @@ public class MainFragment extends Fragment {
                     boolean showInThisChat = false;
 
                     if(gsonObject.has("to")){
-                        if(mainActivity.getTypeChat().equals(Constants.GROUP_CHAT)){
+                        if(chatActivity.getTypeChat().equals(Constants.ROOM_CHAT)){
                             int roomId = gsonObject.get("to").getAsInt();
                             if(roomId == receiverId){
                                 showInThisChat = true;
@@ -334,7 +289,7 @@ public class MainFragment extends Fragment {
                             // notification
                         }
                     }else{
-                        if(mainActivity.getTypeChat().equals(Constants.USER_CHAT)){
+                        if(chatActivity.getTypeChat().equals(Constants.USER_CHAT)){
                             if(gsonObject.has("from")){
                                 JsonObject jsonObjectSender = gsonObject.get("from").getAsJsonObject();
                                 int userId = jsonObjectSender.get("id").getAsInt();
@@ -394,20 +349,80 @@ public class MainFragment extends Fragment {
 
 
 
-
-
     private Runnable onTypingTimeout = new Runnable() {
         @Override
         public void run() {
             if (!mTyping) return;
 
             mTyping = false;
-            if(mainActivity.getTypeChat().equals(Constants.USER_CHAT)){
+            if(chatActivity.getTypeChat().equals(Constants.USER_CHAT)){
                 mSocket.emit("stop typing",receiverId,"user");
             }else{
                 mSocket.emit("stop typing",receiverId,"room");
             }
         }
     };
+
+
+    private Emitter.Listener onMessageSent = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+
+            Log.d("aaaa","antes1 "+args[0]);
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    String username;
+                    String message;
+                    try {
+                        Log.d("aaaa","antes1 "+args[0]);
+                        JsonParser jsonParser = new JsonParser();
+                        JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
+                        JsonObject userJsonObj = gsonObject.getAsJsonObject("user");
+                        User user = User.parseUser(userJsonObj);
+                        username = user.getName();
+                        message = data.getString("message");
+                    } catch (JSONException e) {
+                        return;
+                    }
+
+                    removeTyping(username);
+                    addMessage(username, message);
+
+                    Message receiveMessage = new Message.Builder(Message.TYPE_MESSAGE).username(username).message(message).build();
+                    receiveMessage.save();
+
+                    Chat chat = Chat.createChat(receiverId,((ChatActivity)getActivity()).getTypeChat());
+                    chat.setLastMessage(receiveMessage);
+                    chat.save();
+                }
+            });
+        }
+    };
+
+
+
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.chat_actions, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_add_friend) {
+            Intent i = new Intent(getActivity(), AddFriendToGroupActivity.class);
+            i.putExtra("groupId",receiverId);
+            startActivity(i);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
 }
 

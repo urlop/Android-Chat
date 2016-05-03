@@ -5,6 +5,8 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.github.nkzawa.socketio.androidchat.Constants;
+import com.github.nkzawa.socketio.androidchat.Models.Chat;
 import com.github.nkzawa.socketio.androidchat.Models.Room;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
@@ -86,6 +88,7 @@ public class HomeActivity extends ActionBarActivity {
                     JsonObject jsonObjectRoom = jsonElement.getAsJsonObject();
                     Room room = Room.parseGroup(jsonObjectRoom, mPreferences);
                     room.save();
+                    Chat.createChat(room.getRoomId(), Constants.ROOM_CHAT);
                 }
 
 

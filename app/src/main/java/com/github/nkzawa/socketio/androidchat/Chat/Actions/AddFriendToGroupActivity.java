@@ -1,16 +1,13 @@
 package com.github.nkzawa.socketio.androidchat.Chat.Actions;
 
 import android.app.Activity;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
-import com.github.nkzawa.socketio.androidchat.HomeView.HomeAdapter;
 import com.github.nkzawa.socketio.androidchat.Models.Room;
 import com.github.nkzawa.socketio.androidchat.Models.User;
 import com.github.nkzawa.socketio.androidchat.R;
-import com.github.nkzawa.socketio.androidchat.retrofit.RestClient;
 
 import java.util.ArrayList;
 import java.util.List;

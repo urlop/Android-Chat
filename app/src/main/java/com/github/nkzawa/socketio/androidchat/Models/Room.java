@@ -21,10 +21,6 @@ public class Room extends SugarRecord {
     String socked_id;
     int owner_id;
 
-    // No savedData
-    @Ignore
-    private boolean isTyping= false;
-
 
     public int getRoomId() {
         return roomId;
@@ -56,15 +52,6 @@ public class Room extends SugarRecord {
 
     public void setSocked_id(String socked_id) {
         this.socked_id = socked_id;
-    }
-
-
-    public boolean isTyping() {
-        return isTyping;
-    }
-
-    public void setTyping(boolean typing) {
-        isTyping = typing;
     }
 
     public static class Builder {

@@ -50,10 +50,10 @@ public class CreateGroupActivity extends Activity {
                 createGroup(groupname);
 //                mSocket.emit("join room", userId,groupname);
 //
-//                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+//                Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
 //                intent.putExtra("receiverId", groupname);
 //                intent.putExtra("numUsers", 1);
-//                intent.putExtra("typeChat", Constants.GROUP_CHAT);
+//                intent.putExtra("typeChat", Constants.ROOM_CHAT);
 //                startActivity(intent);
 //                finish();
 

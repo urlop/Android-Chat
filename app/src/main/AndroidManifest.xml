@@ -25,7 +25,7 @@
             android:value="com.github.nkzawa.socketio.androidchat" />
 
         <activity
-            android:name=".Chat.MainActivity"
+            android:name=".Chat.ChatActivity"
             android:label="@string/app_name" />
         <activity
             android:name=".Authentication.LoginActivity"

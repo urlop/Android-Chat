@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.github.nkzawa.socketio.androidchat.ChatApplication;
 import com.github.nkzawa.socketio.androidchat.HomeView.Groups.CreateGroupActivity;
+import com.github.nkzawa.socketio.androidchat.Models.Chat;
 import com.github.nkzawa.socketio.androidchat.Models.Room;
 import com.github.nkzawa.socketio.androidchat.Models.User;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
@@ -32,10 +33,11 @@ import io.socket.emitter.Emitter;
 public class ChatsFragment extends Fragment {
 
     RecyclerView rv_friends;
-    List<Object> contactsList = new ArrayList<>();
+    Button btn_create_group;
+    List<Chat> chatList = new ArrayList<>();
     public Socket mSocket;
     private PreferencesManager mPreferences;
-    private HomeAdapter homeAdapter;
+    private ChatAdapter chatAdapter;
 
 
     public ChatsFragment() {
@@ -104,7 +106,15 @@ public class ChatsFragment extends Fragment {
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         rv_friends.setLayoutManager(layoutManager);
 
+        btn_create_group = (Button)view.findViewById(R.id.btn_create_group);
 
+        btn_create_group.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), CreateGroupActivity.class);
+                startActivity(intent);
+            }
+        });
 
         setContacts();
     }
@@ -176,8 +186,8 @@ public class ChatsFragment extends Fragment {
                         }
                     }
 
-                    homeAdapter.setTypingMessage(messageTyping);
-                    homeAdapter.setTyping(object,true);
+                    chatAdapter.setTypingMessage(messageTyping);
+                    chatAdapter.setTyping(object,true);
                 }
             });
         }
@@ -209,18 +219,32 @@ public class ChatsFragment extends Fragment {
                             object = users.get(0);
                         }
                     }
-                    homeAdapter.setTyping(object,false);
+                    chatAdapter.setTyping(object,false);
                 }
             });
         }
     };
 
     private void setContacts(){
-        List<User> friends = User.listAll(User.class);
-        List<Room> rooms = Room.listAll(Room.class);
-
-        homeAdapter = new HomeAdapter(getActivity(), friends, rooms);
-        rv_friends.setAdapter(homeAdapter);
+        chatList = Chat.listAll(Chat.class);
+        chatAdapter = new ChatAdapter(this, chatList);
+        rv_friends.setAdapter(chatAdapter);
     }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        Bundle extras = data.getExtras();
+        int position = 0 ;
+        if(extras != null) {
+            position = extras.getInt("position", 0);
+        }
+        chatList = Chat.listAll(Chat.class);
+        chatAdapter = new ChatAdapter(this, chatList);
+        rv_friends.setAdapter(chatAdapter);
+    }
+
 
 }
