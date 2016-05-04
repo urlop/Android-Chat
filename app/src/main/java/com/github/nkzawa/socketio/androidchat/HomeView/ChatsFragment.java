@@ -12,9 +12,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.github.nkzawa.socketio.androidchat.Chat.ChatActivity;
 import com.github.nkzawa.socketio.androidchat.ChatApplication;
+import com.github.nkzawa.socketio.androidchat.Constants;
 import com.github.nkzawa.socketio.androidchat.HomeView.Groups.CreateGroupActivity;
 import com.github.nkzawa.socketio.androidchat.Models.Chat;
+import com.github.nkzawa.socketio.androidchat.Models.Message;
 import com.github.nkzawa.socketio.androidchat.Models.Room;
 import com.github.nkzawa.socketio.androidchat.Models.User;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
@@ -22,6 +25,7 @@ import com.github.nkzawa.socketio.androidchat.R;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -80,6 +84,8 @@ public class ChatsFragment extends Fragment {
         mSocket.on("activate user", onUserIsActivated);
         mSocket.on("typing", onTyping);
         mSocket.on("stop typing", onStopTyping);
+        mSocket.on("message sent", onMessageSent);
+
     }
 
     @Override
@@ -89,6 +95,8 @@ public class ChatsFragment extends Fragment {
         mSocket.off("activate user", onUserIsActivated);
         mSocket.off("typing", onTyping);
         mSocket.off("stop typing", onStopTyping);
+        mSocket.off("message sent", onMessageSent);
+
     }
 
 
@@ -165,20 +173,20 @@ public class ChatsFragment extends Fragment {
                     String messageTyping = "";
                     Object object = null;
 
-                    if(gsonObject.has("to")){
-                        List<Room> room = Room.find(Room.class, "room_id = ?", ""+gsonObject.get("to").getAsInt());
+                    if(gsonObject.has("room")){
+                        List<Room> room = Room.find(Room.class, "room_id = ?", ""+gsonObject.get("room").getAsInt());
                         object = room.get(0);
 
                         String userName= "";
-                        if(gsonObject.has("from")){
-                            JsonObject jsonObjectSender = gsonObject.get("from").getAsJsonObject();
+                        if(gsonObject.has("user")){
+                            JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
                             userName = jsonObjectSender.get("name").getAsString();
                         }
                         messageTyping = userName + " is typing";
                     }else{
 
-                        if(gsonObject.has("from")){
-                            JsonObject jsonObjectSender = gsonObject.get("from").getAsJsonObject();
+                        if(gsonObject.has("user")){
+                            JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
                             int userId = jsonObjectSender.get("id").getAsInt();
                             List<User> users = User.find(User.class, "user_id = ?", ""+userId);
                             object = users.get(0);
@@ -205,21 +213,68 @@ public class ChatsFragment extends Fragment {
                     JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
                     Object object = null;
 
-                    if(gsonObject.has("to")){
-                        List<Room> room = Room.find(Room.class, "room_id = ?", ""+gsonObject.get("to").getAsInt());
+                    if(gsonObject.has("room")){
+                        List<Room> room = Room.find(Room.class, "room_id = ?", ""+gsonObject.get("room").getAsInt());
                         object = room.get(0);
 
 
 
                     }else{
-                        if(gsonObject.has("from")){
-                            JsonObject jsonObjectSender = gsonObject.get("from").getAsJsonObject();
+                        if(gsonObject.has("user")){
+                            JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
                             int userId = jsonObjectSender.get("id").getAsInt();
                             List<User> users = User.find(User.class, "user_id = ?", ""+userId);
                             object = users.get(0);
                         }
                     }
                     chatAdapter.setTyping(object,false);
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onMessageSent = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+
+            Log.d("aaaa","antes1 "+args[0]);
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    String username;
+                    String message;
+                    JsonParser jsonParser = new JsonParser();
+                    JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
+                    JsonObject userJsonObj = gsonObject.getAsJsonObject("user");
+                    User user = User.parseUser(userJsonObj);
+                    username = user.getName();
+                    message = gsonObject.get("message").getAsString();
+
+
+                    Chat chat = null;
+                    if(gsonObject.has("room")){
+                        List<Room> room = Room.find(Room.class, "room_id = ?", ""+gsonObject.get("room").getAsInt());
+                        chat = Chat.createChat(room.get(0).getRoomId(), Constants.ROOM_CHAT);
+                    }else{
+                        if(gsonObject.has("user")){
+                            JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
+                            int userId = jsonObjectSender.get("id").getAsInt();
+                            List<User> users = User.find(User.class, "user_id = ?", ""+userId);
+                            chat = Chat.createChat(users.get(0).getUserId(),Constants.USER_CHAT);
+                        }
+                    }
+
+                    Message receiveMessage = new Message.Builder(Message.TYPE_MESSAGE).username(username).message(message).build();
+                    receiveMessage.save();
+
+                    chat.setLastMessage(receiveMessage.getUsername()+": "+receiveMessage.getMessage());
+                    chat.save();
+
+                    receiveMessage.setChat(chat);
+                    receiveMessage.save();
+
+                    setContacts();
                 }
             });
         }

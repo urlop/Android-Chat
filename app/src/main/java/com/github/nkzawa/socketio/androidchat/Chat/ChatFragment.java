@@ -281,9 +281,9 @@ public class ChatFragment extends Fragment {
 
                     boolean showInThisChat = false;
 
-                    if(gsonObject.has("to")){
+                    if(gsonObject.has("room")){
                         if(chatActivity.getTypeChat().equals(Constants.ROOM_CHAT)){
-                            int roomId = gsonObject.get("to").getAsInt();
+                            int roomId = gsonObject.get("room").getAsInt();
                             if(roomId == receiverId){
                                 showInThisChat = true;
                             }
@@ -292,8 +292,8 @@ public class ChatFragment extends Fragment {
                         }
                     }else{
                         if(chatActivity.getTypeChat().equals(Constants.USER_CHAT)){
-                            if(gsonObject.has("from")){
-                                JsonObject jsonObjectSender = gsonObject.get("from").getAsJsonObject();
+                            if(gsonObject.has("user")){
+                                JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
                                 int userId = jsonObjectSender.get("id").getAsInt();
                                 if(userId == receiverId){
                                     showInThisChat = true;
@@ -306,8 +306,8 @@ public class ChatFragment extends Fragment {
 
                     if(showInThisChat){
                         String username = "";
-                        if(gsonObject.has("from")){
-                            JsonObject jsonObjectSender = gsonObject.get("from").getAsJsonObject();
+                        if(gsonObject.has("user")){
+                            JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
                             username = jsonObjectSender.get("name").getAsString();
                         }
                         addTyping(username);
@@ -330,15 +330,15 @@ public class ChatFragment extends Fragment {
                     JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
                     String username = "";
 
-                    if(gsonObject.has("to")){
-                        if(gsonObject.has("from")){
-                            JsonObject jsonObjectSender = gsonObject.get("from").getAsJsonObject();
+                    if(gsonObject.has("room")){
+                        if(gsonObject.has("user")){
+                            JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
                             username = jsonObjectSender.get("name").getAsString();
                         }
                     }else{
 
-                        if(gsonObject.has("from")){
-                            JsonObject jsonObjectSender = gsonObject.get("from").getAsJsonObject();
+                        if(gsonObject.has("user")){
+                            JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
                             username = jsonObjectSender.get("name").getAsString();
                         }
                     }
