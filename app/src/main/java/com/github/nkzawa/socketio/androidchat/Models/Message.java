@@ -12,22 +12,22 @@ public class Message extends SugarRecord {
     @Ignore
     public static final int TYPE_ACTION = 2;
     @Ignore
-    private int mType;
+    private int mType = TYPE_MESSAGE;
 
-    private String mMessage;
-    private String mUsername;
-    private Chat chat;
+    private String message;
+    private String username;
+    Chat chat;
 
     public int getType() {
         return mType;
     };
 
     public String getMessage() {
-        return mMessage;
+        return message;
     };
 
     public String getUsername() {
-        return mUsername;
+        return username;
     };
 
     public Chat getChat() {
@@ -66,8 +66,8 @@ public class Message extends SugarRecord {
         public Message build() {
             Message message = new Message();
             message.mType = mType;
-            message.mUsername = mUsername;
-            message.mMessage = mMessage;
+            message.username = mUsername;
+            message.message = mMessage;
             return message;
         }
     }

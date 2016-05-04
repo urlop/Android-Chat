@@ -15,8 +15,7 @@ import java.util.Objects;
 public class Chat extends SugarRecord {
     int receiverId;
     String chatType;
-    Message lastMessage;
-
+    String lastMessage;
 
     // No savedData
     @Ignore
@@ -39,13 +38,6 @@ public class Chat extends SugarRecord {
         this.chatType = chatType;
     }
 
-    public Message getLastMessage() {
-        return lastMessage;
-    }
-
-    public void setLastMessage(Message lastMessage) {
-        this.lastMessage = lastMessage;
-    }
 
     public int getReceiverId() {
         return receiverId;
@@ -53,6 +45,14 @@ public class Chat extends SugarRecord {
 
     public void setReceiverId(int receiverId) {
         this.receiverId = receiverId;
+    }
+
+    public String getLastMessage() {
+        return lastMessage;
+    }
+
+    public void setLastMessage(String lastMessage) {
+        this.lastMessage = lastMessage;
     }
 
     public static Chat getChat(int receiverId, String chatType){

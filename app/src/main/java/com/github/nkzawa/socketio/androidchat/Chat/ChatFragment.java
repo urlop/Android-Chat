@@ -65,6 +65,7 @@ public class ChatFragment extends Fragment {
     public Socket mSocket;
     private PreferencesManager mPreferences;
     private ChatActivity chatActivity;
+    private Chat mChat;
 
     public ChatFragment() {
         super();
@@ -73,7 +74,6 @@ public class ChatFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mAdapter = new MessageAdapter(activity, mMessages);
     }
 
     @Override
@@ -94,11 +94,9 @@ public class ChatFragment extends Fragment {
         mSocket.on("typing", onTyping);
         mSocket.on("stop typing", onStopTyping);
         mSocket.on("message sent", onMessageSent);
-
-
-
         mUsername = mPreferences.getUserName();
         receiverId = ((ChatActivity)getActivity()).getReceiverId();
+
     }
 
     @Override
@@ -125,6 +123,15 @@ public class ChatFragment extends Fragment {
 
         mMessagesView = (RecyclerView) view.findViewById(R.id.messages);
         mMessagesView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+
+        mChat = Chat.getChat(receiverId,((ChatActivity)getActivity()).getTypeChat());
+        if(mChat != null){
+            mMessages = mChat.getMessages();
+            Log.d("esss","miraaaame "+mMessages.size());
+        }
+
+        mAdapter = new MessageAdapter(chatActivity, mMessages);
         mMessagesView.setAdapter(mAdapter);
 
         mInputMessageView = (EditText) view.findViewById(R.id.message_input);
@@ -176,10 +183,6 @@ public class ChatFragment extends Fragment {
         });
 
 
-        addLog(getResources().getString(R.string.message_welcome));
-
-        Chat chat = Chat.getChat(receiverId,((ChatActivity)getActivity()).getTypeChat());
-
     }
 
 
@@ -190,9 +193,6 @@ public class ChatFragment extends Fragment {
         scrollToBottom();
     }
 
-    private void addParticipantsLog(int numUsers) {
-        addLog(getResources().getQuantityString(R.plurals.message_participants, numUsers, numUsers));
-    }
 
     protected void addMessage(String username, String message) {
         mMessages.add(new Message.Builder(Message.TYPE_MESSAGE)
@@ -240,8 +240,10 @@ public class ChatFragment extends Fragment {
         message.save();
 
         Chat chat = Chat.createChat(receiverId,((ChatActivity)getActivity()).getTypeChat());
-        chat.setLastMessage(message);
+        chat.setLastMessage(message.getUsername()+": "+message.getMessage());
         chat.save();
+        message.setChat(chat);
+        message.save();
         mSocket.emit("send message", messageToSend, receiverId,((ChatActivity)getActivity()).getTypeChat());
     }
 
@@ -394,8 +396,11 @@ public class ChatFragment extends Fragment {
                     receiveMessage.save();
 
                     Chat chat = Chat.createChat(receiverId,((ChatActivity)getActivity()).getTypeChat());
-                    chat.setLastMessage(receiveMessage);
+                    chat.setLastMessage(receiveMessage.getUsername()+": "+receiveMessage.getMessage());
                     chat.save();
+
+                    receiveMessage.setChat(chat);
+                    receiveMessage.save();
                 }
             });
         }

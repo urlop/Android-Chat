@@ -84,7 +84,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             userViewHolder.setTyping(typingMessage);
         }else{
             if (chat.getLastMessage() != null) {
-                userViewHolder.setTyping(chat.getLastMessage().getMessage());
+                userViewHolder.setTyping(chat.getLastMessage());
             }else{
                 userViewHolder.setTyping("");
             }

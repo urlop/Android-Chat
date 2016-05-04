@@ -5,6 +5,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.github.nkzawa.socketio.androidchat.Chat.ChatFragment;
 import com.github.nkzawa.socketio.androidchat.Constants;
 import com.github.nkzawa.socketio.androidchat.Models.Chat;
 import com.github.nkzawa.socketio.androidchat.Models.Room;
@@ -91,7 +92,8 @@ public class HomeActivity extends ActionBarActivity {
                     Chat.createChat(room.getRoomId(), Constants.ROOM_CHAT);
                 }
 
-
+                ChatsFragment currentFragment = (ChatsFragment)getSupportFragmentManager().findFragmentByTag("Chat");
+                currentFragment.setContacts();
 //                //                Date lastDate = mPreferences.getLastUserInfoUpdate();
 //
 //                Date currentDate = new Date();

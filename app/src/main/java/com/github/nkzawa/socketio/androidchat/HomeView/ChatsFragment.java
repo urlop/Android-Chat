@@ -225,7 +225,7 @@ public class ChatsFragment extends Fragment {
         }
     };
 
-    private void setContacts(){
+    public void setContacts(){
         chatList = Chat.listAll(Chat.class);
         chatAdapter = new ChatAdapter(this, chatList);
         rv_friends.setAdapter(chatAdapter);
