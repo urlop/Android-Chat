@@ -32,12 +32,13 @@ import com.github.nkzawa.socketio.androidchat.Models.Message;
 import com.github.nkzawa.socketio.androidchat.Models.User;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
+import com.github.nkzawa.socketio.androidchat.retrofit.ChatUtilsMethods;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
-import org.json.JSONException;
+
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public class ChatFragment extends Fragment {
     public Socket mSocket;
     private PreferencesManager mPreferences;
     private ChatActivity chatActivity;
-    private Chat mChat;
+    private Chat currentChat;
 
     public ChatFragment() {
         super();
@@ -125,9 +126,9 @@ public class ChatFragment extends Fragment {
         mMessagesView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
 
-        mChat = Chat.getChat(receiverId,((ChatActivity)getActivity()).getTypeChat());
-        if(mChat != null){
-            mMessages = mChat.getMessages();
+        currentChat = Chat.createChat(receiverId,((ChatActivity)getActivity()).getTypeChat());
+        if(currentChat != null){
+            mMessages = currentChat.getMessages();
             Log.d("esss","miraaaame "+mMessages.size());
         }
 
@@ -237,13 +238,11 @@ public class ChatFragment extends Fragment {
         Log.d("see enviaa", "tu :"+messageToSend + "-" + receiverId+ "-" + "user");
 
         Message message = new Message.Builder(Message.TYPE_MESSAGE).username(mUsername).message(messageToSend).build();
+        message.setChat(currentChat);
         message.save();
+        currentChat.setLastMessage(message.getUsername()+": "+message.getMessage());
+        currentChat.save();
 
-        Chat chat = Chat.createChat(receiverId,((ChatActivity)getActivity()).getTypeChat());
-        chat.setLastMessage(message.getUsername()+": "+message.getMessage());
-        chat.save();
-        message.setChat(chat);
-        message.save();
         mSocket.emit("send message", messageToSend, receiverId,((ChatActivity)getActivity()).getTypeChat());
     }
 
@@ -270,6 +269,7 @@ public class ChatFragment extends Fragment {
     private Emitter.Listener onTyping = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
+
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -279,38 +279,12 @@ public class ChatFragment extends Fragment {
                     JsonParser jsonParser = new JsonParser();
                     JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
 
-                    boolean showInThisChat = false;
-
-                    if(gsonObject.has("room")){
-                        if(chatActivity.getTypeChat().equals(Constants.ROOM_CHAT)){
-                            int roomId = gsonObject.get("room").getAsInt();
-                            if(roomId == receiverId){
-                                showInThisChat = true;
-                            }
-                        }else{
-                            // notification
-                        }
-                    }else{
-                        if(chatActivity.getTypeChat().equals(Constants.USER_CHAT)){
-                            if(gsonObject.has("user")){
-                                JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
-                                int userId = jsonObjectSender.get("id").getAsInt();
-                                if(userId == receiverId){
-                                    showInThisChat = true;
-                                }
-                            }
-                        }else{
-                            // notification
-                        }
-                    }
-
-                    if(showInThisChat){
-                        String username = "";
+                    if(ChatUtilsMethods.isUserInsideChat(gsonObject, currentChat)){
                         if(gsonObject.has("user")){
                             JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
-                            username = jsonObjectSender.get("name").getAsString();
+                            User user = User.parseUser(jsonObjectSender);
+                            addTyping(user.getName());
                         }
-                        addTyping(username);
                     }
                 }
             });
@@ -328,22 +302,14 @@ public class ChatFragment extends Fragment {
                     JSONObject data = (JSONObject) args[0];
                     JsonParser jsonParser = new JsonParser();
                     JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
-                    String username = "";
 
-                    if(gsonObject.has("room")){
+                    if(ChatUtilsMethods.isUserInsideChat(gsonObject, currentChat)){
                         if(gsonObject.has("user")){
                             JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
-                            username = jsonObjectSender.get("name").getAsString();
-                        }
-                    }else{
-
-                        if(gsonObject.has("user")){
-                            JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
-                            username = jsonObjectSender.get("name").getAsString();
+                            User user = User.parseUser(jsonObjectSender);
+                            removeTyping(user.getName());
                         }
                     }
-
-                    removeTyping(username);
                 }
             });
         }
@@ -375,32 +341,36 @@ public class ChatFragment extends Fragment {
                 @Override
                 public void run() {
                     JSONObject data = (JSONObject) args[0];
-                    String username;
-                    String message;
-                    try {
-                        Log.d("aaaa","antes1 "+args[0]);
-                        JsonParser jsonParser = new JsonParser();
-                        JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
-                        JsonObject userJsonObj = gsonObject.getAsJsonObject("user");
-                        User user = User.parseUser(userJsonObj);
-                        username = user.getName();
-                        message = data.getString("message");
-                    } catch (JSONException e) {
-                        return;
+                    JsonParser jsonParser = new JsonParser();
+                    JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
+
+                    JsonObject userJsonObj = gsonObject.getAsJsonObject("user");
+                    User user = User.parseUser(userJsonObj);
+                    String message = gsonObject.get("message").getAsString();
+
+                    Chat chatReceiver = currentChat;
+
+                    if(ChatUtilsMethods.isUserInsideChat(gsonObject, currentChat)){
+                        removeTyping(user.getName());
+                        addMessage(user.getName(), message);
+                    }else{
+                        chatReceiver = ChatUtilsMethods.getChatFromNewMessage(gsonObject);
+                        Log.e("esssssss","esssss "+gsonObject);
                     }
 
-                    removeTyping(username);
-                    addMessage(username, message);
-
-                    Message receiveMessage = new Message.Builder(Message.TYPE_MESSAGE).username(username).message(message).build();
+                    Message receiveMessage = new Message.Builder(Message.TYPE_MESSAGE).username(user.getName()).message(message).build();
+                    receiveMessage.setChat(chatReceiver);
                     receiveMessage.save();
+                    chatReceiver.setLastMessage(receiveMessage.getUsername()+": "+receiveMessage.getMessage());
+                    chatReceiver.save();
 
-                    Chat chat = Chat.createChat(receiverId,((ChatActivity)getActivity()).getTypeChat());
-                    chat.setLastMessage(receiveMessage.getUsername()+": "+receiveMessage.getMessage());
-                    chat.save();
+                    if(currentChat != chatReceiver){
+                        ChatUtilsMethods.createNewMessageNotification(getActivity(),chatReceiver, receiveMessage);
 
-                    receiveMessage.setChat(chat);
-                    receiveMessage.save();
+                        Log.e("esssssss","esssss "+gsonObject);
+
+                    }
+
                 }
             });
         }
