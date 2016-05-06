@@ -1,4 +1,4 @@
-package com.github.nkzawa.socketio.androidchat.HomeView;
+package com.github.nkzawa.socketio.androidchat.HomeView.Contacts;
 
 import android.app.Activity;
 import android.content.Intent;

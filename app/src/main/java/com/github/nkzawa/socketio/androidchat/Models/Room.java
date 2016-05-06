@@ -92,7 +92,7 @@ public class Room extends SugarRecord {
         }
     }
 
-    public static Room parseGroup(JsonObject responseObject, PreferencesManager preferencesManager) {
+    public static Room parseRoom(JsonObject responseObject) {
 
         Builder roomBuilder;
         roomBuilder = new Builder(responseObject.get("id").getAsInt());

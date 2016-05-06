@@ -1,4 +1,4 @@
-package com.github.nkzawa.socketio.androidchat.HomeView;
+package com.github.nkzawa.socketio.androidchat.HomeView.Contacts;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,22 +10,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.github.nkzawa.socketio.androidchat.HomeView.Groups.CreateGroupActivity;
-import com.github.nkzawa.socketio.androidchat.Models.Room;
+import com.github.nkzawa.socketio.androidchat.HomeView.Chats.ChatAdapter;
+import com.github.nkzawa.socketio.androidchat.HomeView.Chats.Groups.CreateGroupActivity;
+import com.github.nkzawa.socketio.androidchat.Models.Chat;
 import com.github.nkzawa.socketio.androidchat.Models.User;
-import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import io.socket.client.Socket;
-
 public class ContactsFragment extends Fragment {
 
     RecyclerView rv_friends;
-    List<Object> contactsList = new ArrayList<>();
+    List<User> contactsList = new ArrayList<>();
     private ContactsAdapter contactsAdapter;
+    private Button btn_add_contact;
 
     public ContactsFragment() {
         // Required empty public constructor
@@ -61,16 +60,33 @@ public class ContactsFragment extends Fragment {
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         rv_friends.setLayoutManager(layoutManager);
+        btn_add_contact = (Button) view.findViewById(R.id.btn_add_contact);
+
+        btn_add_contact.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), AddContactActivity.class);
+                startActivityForResult(intent, 1);
+            }
+        });
 
         setContacts();
     }
 
 
     private void setContacts(){
-        List<User> friends = User.listAll(User.class);
+        contactsList = User.listAll(User.class);
 
-        contactsAdapter = new ContactsAdapter(getActivity(), friends);
+        contactsAdapter = new ContactsAdapter(getActivity(), contactsList);
         rv_friends.setAdapter(contactsAdapter);
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        contactsList = User.listAll(User.class);
+        contactsAdapter = new ContactsAdapter(getActivity(), contactsList);
+        rv_friends.setAdapter(contactsAdapter);
+    }
 }

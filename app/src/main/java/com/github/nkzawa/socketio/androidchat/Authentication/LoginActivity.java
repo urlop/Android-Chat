@@ -21,7 +21,6 @@ import com.github.nkzawa.socketio.androidchat.retrofit.RestClient;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -140,30 +139,30 @@ public class LoginActivity extends Activity {
 
                 JsonObject me = jsonObject.get("me").getAsJsonObject();
 
-            String name = me.get("name").getAsString();
-            int userId = me.get("id").getAsInt();
-            mPreferences.saveUser(userId,name);
+                String name = me.get("name").getAsString();
+                int userId = me.get("id").getAsInt();
+                mPreferences.saveUser(userId,name);
 
-            JsonArray jsonArray = null;
-            jsonArray = jsonObject.get("users").getAsJsonArray();
+                JsonArray jsonArray = null;
+                jsonArray = jsonObject.get("users").getAsJsonArray();
 
-            for (JsonElement jsonElement : jsonArray) {
-                JsonObject jsonObjectUser = jsonElement.getAsJsonObject();
-                User user = User.parseUser(jsonObjectUser);
-                user.save();
-            }
+                for (JsonElement jsonElement : jsonArray) {
+                    JsonObject jsonObjectUser = jsonElement.getAsJsonObject();
+                    User user = User.parseUser(jsonObjectUser);
+                    user.save();
+                }
 
-            jsonArray = jsonObject.get("rooms").getAsJsonArray();
+                jsonArray = jsonObject.get("rooms").getAsJsonArray();
 
-            for (JsonElement jsonElement : jsonArray) {
-                JsonObject jsonObjectRoom = jsonElement.getAsJsonObject();
-                Room room = Room.parseGroup(jsonObjectRoom, mPreferences);
-                room.save();
-            }
+                for (JsonElement jsonElement : jsonArray) {
+                    JsonObject jsonObjectRoom = jsonElement.getAsJsonObject();
+                    Room room = Room.parseRoom(jsonObjectRoom);
+                    room.save();
+                }
 
-            Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
-            startActivity(intent);
-            finish();
+                Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+                startActivity(intent);
+                finish();
 
 
             }

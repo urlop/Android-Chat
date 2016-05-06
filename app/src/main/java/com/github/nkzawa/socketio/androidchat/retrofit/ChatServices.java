@@ -32,4 +32,7 @@ public interface ChatServices {
     @GET(Urls.GET_USER_ID)
     void getUserInfo(@Path("id") int id, Callback<JsonObject> callback);
 
+    @POST(Urls.ADD_CONTACT)
+    void addContact(@Body Object body, Callback<JsonObject> callback);
+
 }

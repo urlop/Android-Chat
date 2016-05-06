@@ -1,13 +1,16 @@
-package com.github.nkzawa.socketio.androidchat.HomeView.Groups;
+package com.github.nkzawa.socketio.androidchat.HomeView.Chats.Groups;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
 import com.github.nkzawa.socketio.androidchat.ChatApplication;
+import com.github.nkzawa.socketio.androidchat.Constants;
+import com.github.nkzawa.socketio.androidchat.Models.Chat;
+import com.github.nkzawa.socketio.androidchat.Models.Room;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
 import com.github.nkzawa.socketio.androidchat.retrofit.RestClient;
@@ -47,18 +50,7 @@ public class CreateGroupActivity extends Activity {
             @Override
             public void onClick(View v) {
                 String groupname = et_group_name.getText().toString();
-                createGroup(groupname);
-//                mSocket.emit("join room", userId,groupname);
-//
-//                Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
-//                intent.putExtra("receiverId", groupname);
-//                intent.putExtra("numUsers", 1);
-//                intent.putExtra("typeChat", Constants.ROOM_CHAT);
-//                startActivity(intent);
-//                finish();
-
-
-            }
+                createGroup(groupname);}
         });
     }
 
@@ -73,8 +65,13 @@ public class CreateGroupActivity extends Activity {
             @Override
             public void success(JsonObject jsonObject, Response response) {
 
-                Log.d("aaaa","aaaa2"+ response);
-
+                Room room = Room.parseRoom(jsonObject);
+                room.save();
+                Chat chat = Chat.createChat(room.getRoomId(), Constants.ROOM_CHAT);
+                chat.save();
+                Intent returnIntent = new Intent();
+                setResult(Activity.RESULT_OK,returnIntent);
+                finish();
             }
 
             @Override

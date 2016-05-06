@@ -1,4 +1,4 @@
-package com.github.nkzawa.socketio.androidchat.retrofit;
+package com.github.nkzawa.socketio.androidchat;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -44,23 +44,35 @@ public class ChatUtilsMethods {
     }
 
     public static Chat getChatFromNewMessage(JsonObject gsonObject){
-
         Chat newChat = null;
-
         if(gsonObject.has("room")){
             int roomId = gsonObject.get("room").getAsInt();
             newChat = Chat.createChat(roomId,Constants.ROOM_CHAT);
-
         }else{
             if(gsonObject.has("user")){
                 JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
                 int userId = jsonObjectSender.get("id").getAsInt();
                 newChat = Chat.createChat(userId,Constants.USER_CHAT);
-
             }
         }
         return newChat;
     }
+
+    public static Chat getChatFromMessage(JsonObject gsonObject){
+        Chat newChat = null;
+        if(gsonObject.has("room")){
+            int roomId = gsonObject.get("room").getAsInt();
+            newChat = Chat.createChat(roomId,Constants.ROOM_CHAT);
+        }else{
+            if(gsonObject.has("user")){
+                JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
+                int userId = jsonObjectSender.get("id").getAsInt();
+                newChat = Chat.createChat(userId,Constants.USER_CHAT);
+            }
+        }
+        return newChat;
+    }
+
 
 
     public static void createNewMessageNotification(Context context, Chat chat, Message message){

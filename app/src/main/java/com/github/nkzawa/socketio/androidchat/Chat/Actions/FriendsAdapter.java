@@ -26,12 +26,13 @@ public class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private List<User> mContacts;
     private RestClient restClient;
     private int groupId;
+    private AddFriendToGroupActivity activity;
 
-
-    public FriendsAdapter(List<User> contacts, int groupId) {
+    public FriendsAdapter(List<User> contacts, int groupId, AddFriendToGroupActivity activity ) {
         mContacts = contacts;
         restClient = new RestClient();
         this.groupId =groupId;
+        this.activity = activity;
     }
 
     @Override
@@ -91,8 +92,7 @@ public class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         restClient.getWebservices().addUserToRoom(groupId, userId, new Callback<JsonObject>() {
             @Override
             public void success(JsonObject jsonObject, Response response) {
-
-
+                activity.finish();
             }
 
             @Override

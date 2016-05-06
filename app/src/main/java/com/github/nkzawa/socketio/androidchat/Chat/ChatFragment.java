@@ -32,7 +32,7 @@ import com.github.nkzawa.socketio.androidchat.Models.Message;
 import com.github.nkzawa.socketio.androidchat.Models.User;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
-import com.github.nkzawa.socketio.androidchat.retrofit.ChatUtilsMethods;
+import com.github.nkzawa.socketio.androidchat.ChatUtilsMethods;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 

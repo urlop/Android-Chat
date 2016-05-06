@@ -11,4 +11,6 @@ public interface Urls {
     String CREATE_GROUP = "/rooms";
     String ADD_USER_TO_GROUP = "/rooms/{id}/invite";
     String GET_ROOM_ID = "/rooms/{id}";
+
+    String ADD_CONTACT = "/contacts";
 }

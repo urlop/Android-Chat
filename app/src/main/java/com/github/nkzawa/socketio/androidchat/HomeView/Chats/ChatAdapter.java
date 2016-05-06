@@ -1,6 +1,5 @@
-package com.github.nkzawa.socketio.androidchat.HomeView;
+package com.github.nkzawa.socketio.androidchat.HomeView.Chats;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -99,21 +98,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
 
-    public void setTyping(Object object, boolean isTyping){
-
+    public void setTyping(Chat chat, boolean isTyping){
         for(int i=0 ; i<mChats.size(); i++){
-            if(Room.class.isInstance(object) && mChats.get(i).getChatType().equals(Constants.ROOM_CHAT)){
-                if(((Room)object).getRoomId() == mChats.get(i).getReceiverId()){
-                    mChats.get(i).setTyping(isTyping);
-                    notifyItemChanged(i);
-                    break;
-                }
-            }else if(User.class.isInstance(object) && mChats.get(i).getChatType().equals(Constants.USER_CHAT)){
-                if(((User)object).getUserId() == mChats.get(i).getReceiverId()){
-                    mChats.get(i).setTyping(isTyping);
-                    notifyItemChanged(i);
-                    break;
-                }
+            if(chat.getReceiverId() ==  mChats.get(i).getReceiverId()){
+                mChats.get(i).setTyping(isTyping);
+                notifyItemChanged(i);
+                break;
             }
         }
     }

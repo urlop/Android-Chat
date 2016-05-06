@@ -1,4 +1,4 @@
-package com.github.nkzawa.socketio.androidchat.HomeView;
+package com.github.nkzawa.socketio.androidchat.HomeView.Chats;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,22 +10,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
 
-import com.github.nkzawa.socketio.androidchat.Chat.ChatActivity;
 import com.github.nkzawa.socketio.androidchat.ChatApplication;
 import com.github.nkzawa.socketio.androidchat.Constants;
-import com.github.nkzawa.socketio.androidchat.HomeView.Groups.CreateGroupActivity;
+import com.github.nkzawa.socketio.androidchat.HomeView.Chats.Groups.CreateGroupActivity;
 import com.github.nkzawa.socketio.androidchat.Models.Chat;
-import com.github.nkzawa.socketio.androidchat.Models.Message;
-import com.github.nkzawa.socketio.androidchat.Models.Room;
-import com.github.nkzawa.socketio.androidchat.Models.User;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -37,12 +31,11 @@ import io.socket.emitter.Emitter;
 public class ChatsFragment extends Fragment {
 
     RecyclerView rv_friends;
-    Button btn_create_group;
+    private Button btn_create_group;
     List<Chat> chatList = new ArrayList<>();
-    public Socket mSocket;
     private PreferencesManager mPreferences;
     private ChatAdapter chatAdapter;
-
+    public Socket mSocket;
 
     public ChatsFragment() {
         // Required empty public constructor
@@ -80,32 +73,20 @@ public class ChatsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        mSocket.on(Socket.EVENT_CONNECT, onUserIsConnected);
-        mSocket.on("activate user", onUserIsActivated);
         mSocket.on("typing", onTyping);
         mSocket.on("stop typing", onStopTyping);
-        mSocket.on("message sent", onMessageSent);
-
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mSocket.off(Socket.EVENT_CONNECT_ERROR, onUserIsConnected);
-        mSocket.off("activate user", onUserIsActivated);
         mSocket.off("typing", onTyping);
-        mSocket.off("stop typing", onStopTyping);
-        mSocket.off("message sent", onMessageSent);
-
     }
 
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mSocket.disconnect();
-
-
     }
 
     public void setupView(View view){
@@ -120,45 +101,12 @@ public class ChatsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), CreateGroupActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, 1);
             }
         });
 
         setContacts();
     }
-
-    public void connectToServer(){
-        Log.d("el socket es :", "ooo : "+mSocket.id());
-        mSocket.emit("activate user", mPreferences.getUserId(), mSocket.id());
-    }
-
-    private Emitter.Listener onUserIsActivated = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(getActivity(), "Conectado", Toast.LENGTH_SHORT).show();
-
-                }
-            });
-        }
-    };
-
-
-    private Emitter.Listener onUserIsConnected = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Log.d("user connected", " es : "+args.toString());
-                    connectToServer();
-
-                }
-            });
-        }
-    };
 
     private Emitter.Listener onTyping = new Emitter.Listener() {
         @Override
@@ -170,32 +118,29 @@ public class ChatsFragment extends Fragment {
                     JSONObject data = (JSONObject) args[0];
                     JsonParser jsonParser = new JsonParser();
                     JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
-                    String messageTyping = "";
-                    Object object = null;
+                    String messageTyping = "is typing";
+                    Chat chat = null;
 
                     if(gsonObject.has("room")){
-                        List<Room> room = Room.find(Room.class, "room_id = ?", ""+gsonObject.get("room").getAsInt());
-                        object = room.get(0);
-
+                        chat = Chat.getChat(gsonObject.get("room").getAsInt(), Constants.ROOM_CHAT);
                         String userName= "";
                         if(gsonObject.has("user")){
                             JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
                             userName = jsonObjectSender.get("name").getAsString();
+                            messageTyping = userName + " is typing";
                         }
-                        messageTyping = userName + " is typing";
                     }else{
-
                         if(gsonObject.has("user")){
                             JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
-                            int userId = jsonObjectSender.get("id").getAsInt();
-                            List<User> users = User.find(User.class, "user_id = ?", ""+userId);
-                            object = users.get(0);
-                            messageTyping = "is typing";
+                            chat = Chat.getChat(jsonObjectSender.get("id").getAsInt(), Constants.USER_CHAT);
                         }
                     }
 
-                    chatAdapter.setTypingMessage(messageTyping);
-                    chatAdapter.setTyping(object,true);
+                    if(chat!=null){
+                       chatAdapter.setTypingMessage(messageTyping);
+                       chatAdapter.setTyping(chat,true);
+                    }
+
                 }
             });
         }
@@ -211,70 +156,19 @@ public class ChatsFragment extends Fragment {
                     JSONObject data = (JSONObject) args[0];
                     JsonParser jsonParser = new JsonParser();
                     JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
-                    Object object = null;
-
-                    if(gsonObject.has("room")){
-                        List<Room> room = Room.find(Room.class, "room_id = ?", ""+gsonObject.get("room").getAsInt());
-                        object = room.get(0);
-
-
-
-                    }else{
-                        if(gsonObject.has("user")){
-                            JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
-                            int userId = jsonObjectSender.get("id").getAsInt();
-                            List<User> users = User.find(User.class, "user_id = ?", ""+userId);
-                            object = users.get(0);
-                        }
-                    }
-                    chatAdapter.setTyping(object,false);
-                }
-            });
-        }
-    };
-
-    private Emitter.Listener onMessageSent = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-
-            Log.d("aaaa","antes1 "+args[0]);
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    String username;
-                    String message;
-                    JsonParser jsonParser = new JsonParser();
-                    JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
-                    JsonObject userJsonObj = gsonObject.getAsJsonObject("user");
-                    User user = User.parseUser(userJsonObj);
-                    username = user.getName();
-                    message = gsonObject.get("message").getAsString();
-
-
                     Chat chat = null;
+
                     if(gsonObject.has("room")){
-                        List<Room> room = Room.find(Room.class, "room_id = ?", ""+gsonObject.get("room").getAsInt());
-                        chat = Chat.createChat(room.get(0).getRoomId(), Constants.ROOM_CHAT);
+                        chat = Chat.getChat(gsonObject.get("room").getAsInt(), Constants.ROOM_CHAT);
                     }else{
                         if(gsonObject.has("user")){
                             JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
-                            int userId = jsonObjectSender.get("id").getAsInt();
-                            List<User> users = User.find(User.class, "user_id = ?", ""+userId);
-                            chat = Chat.createChat(users.get(0).getUserId(),Constants.USER_CHAT);
+                            chat = Chat.getChat(jsonObjectSender.get("id").getAsInt(), Constants.USER_CHAT);
                         }
                     }
-
-                    Message receiveMessage = new Message.Builder(Message.TYPE_MESSAGE).username(username).message(message).build();
-                    receiveMessage.save();
-
-                    chat.setLastMessage(receiveMessage.getUsername()+": "+receiveMessage.getMessage());
-                    chat.save();
-
-                    receiveMessage.setChat(chat);
-                    receiveMessage.save();
-
-                    setContacts();
+                    if(chat!=null){
+                        chatAdapter.setTyping(chat,false);
+                    }
                 }
             });
         }
@@ -291,11 +185,11 @@ public class ChatsFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        Bundle extras = data.getExtras();
-        int position = 0 ;
-        if(extras != null) {
-            position = extras.getInt("position", 0);
-        }
+//        Bundle extras = data.getExtras();
+//        int position = 0 ;
+//        if(extras != null) {
+//            position = extras.getInt("position", 0);
+//        }
         chatList = Chat.listAll(Chat.class);
         chatAdapter = new ChatAdapter(this, chatList);
         rv_friends.setAdapter(chatAdapter);
