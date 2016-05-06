@@ -54,13 +54,10 @@ public class AddContactActivity extends ActionBarActivity {
     }
 
     private void addContact(String contactUserName){
-        JsonObject group = new JsonObject();
         JsonObject attributes = new JsonObject();
         attributes.addProperty("name", contactUserName);
         attributes.addProperty("owner_id", mPreferences.getUserId());
-        group.add("contact",attributes);
-
-        restClient.getWebservices().addContact( group, new Callback<JsonObject>() {
+        restClient.getWebservices().addContact( attributes, new Callback<JsonObject>() {
             @Override
             public void success(JsonObject jsonObject, Response response) {
 

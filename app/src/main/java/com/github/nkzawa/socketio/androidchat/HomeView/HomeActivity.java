@@ -217,7 +217,7 @@ public class HomeActivity extends ActionBarActivity {
                     receiveMessage.setChat(chat);
                     receiveMessage.save();
 
-                    if(ChatFragment.class.isInstance(getSupportFragmentManager().findFragmentByTag("Chat"))){
+                    if(ChatsFragment.class.isInstance(getSupportFragmentManager().findFragmentByTag("Chat"))){
                         ChatsFragment chatFragment = (ChatsFragment)getSupportFragmentManager().findFragmentByTag("Chat");
                         chatFragment.setContacts();
                     }
