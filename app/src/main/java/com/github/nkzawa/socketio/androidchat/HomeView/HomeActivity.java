@@ -26,6 +26,8 @@ import com.google.gson.JsonParser;
 
 import org.json.JSONObject;
 
+import java.util.List;
+
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import retrofit.Callback;
@@ -205,6 +207,15 @@ public class HomeActivity extends ActionBarActivity {
                         lastMessage = ""+username+": "+message;
                     }else{
                         if(gsonObject.has("user")){
+                            List<User> users = User.find(User.class, "user_id = ?", ""+user.getUserId());
+                            if (users.isEmpty()){
+                                user.save();
+                                if(ContactsFragment.class.isInstance(getSupportFragmentManager().findFragmentByTag("Contacts"))){
+                                    ContactsFragment contactsFragment = (ContactsFragment)getSupportFragmentManager().findFragmentByTag("Contacts");
+                                    contactsFragment.setContacts();
+                                }
+
+                            }
                             chat = Chat.createChat(user.getUserId(),Constants.USER_CHAT);
                         }
                         lastMessage = message;

@@ -7,8 +7,11 @@ import retrofit.http.Body;
 import retrofit.http.Field;
 import retrofit.http.FormUrlEncoded;
 import retrofit.http.GET;
+import retrofit.http.Multipart;
 import retrofit.http.POST;
+import retrofit.http.Part;
 import retrofit.http.Path;
+import retrofit.mime.TypedFile;
 
 /**
  * Created by rubymobile on 21/04/16.
@@ -34,5 +37,9 @@ public interface ChatServices {
 
     @POST(Urls.ADD_CONTACT)
     void addContact(@Body Object body, Callback<JsonObject> callback);
+
+    @Multipart
+    @POST(Urls.MESSAGE)
+    void sendMessage(@Part("message[sender_id]") String sender_id ,@Part("message[receiver_user_id]") String receiver_user_id,@Part("message[receiver_room_id]") String receiver_room_id, @Part("message[media_file]") TypedFile image,@Part("message[content]") String content ,Callback<JsonObject> callback);
 
 }

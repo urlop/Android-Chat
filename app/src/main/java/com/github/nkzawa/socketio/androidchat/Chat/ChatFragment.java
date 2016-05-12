@@ -2,6 +2,7 @@ package com.github.nkzawa.socketio.androidchat.Chat;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -27,20 +28,27 @@ import android.widget.Toast;
 import com.github.nkzawa.socketio.androidchat.Chat.Actions.AddFriendToGroupActivity;
 import com.github.nkzawa.socketio.androidchat.ChatApplication;
 import com.github.nkzawa.socketio.androidchat.Constants;
+import com.github.nkzawa.socketio.androidchat.LibraryCropperActivity;
 import com.github.nkzawa.socketio.androidchat.Models.Chat;
 import com.github.nkzawa.socketio.androidchat.Models.Message;
 import com.github.nkzawa.socketio.androidchat.Models.User;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
 import com.github.nkzawa.socketio.androidchat.ChatUtilsMethods;
+import com.github.nkzawa.socketio.androidchat.retrofit.RestClient;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+import retrofit.mime.TypedFile;
 
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,9 +72,12 @@ public class ChatFragment extends Fragment {
     protected int receiverId;
     protected String messageToSend;
     public Socket mSocket;
-    private PreferencesManager mPreferences;
     private ChatActivity chatActivity;
     private Chat currentChat;
+    private Uri newImageUri;
+    private int countCapturedImages;
+    private RestClient restClient;
+    private PreferencesManager mPreferences;
 
     public ChatFragment() {
         super();
@@ -97,6 +108,9 @@ public class ChatFragment extends Fragment {
         mSocket.on("message sent", onMessageSent);
         mUsername = mPreferences.getUserName();
         receiverId = ((ChatActivity)getActivity()).getReceiverId();
+        countCapturedImages = 0;
+        restClient = new RestClient();
+        mPreferences = PreferencesManager.getInstance(getActivity());
 
     }
 
@@ -180,6 +194,14 @@ public class ChatFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 attemptSend();
+            }
+        });
+
+        ImageButton iv_btn_image = (ImageButton) view.findViewById(R.id.iv_btn_image);
+        iv_btn_image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goToGetPicture();
             }
         });
 
@@ -398,6 +420,51 @@ public class ChatFragment extends Fragment {
 
         return super.onOptionsItemSelected(item);
     }
+
+    private void goToGetPicture(){
+        Intent intent = new Intent(getActivity(), LibraryCropperActivity.class);
+        intent.putExtra("count", countCapturedImages);
+        countCapturedImages++;
+        startActivityForResult(intent, 1);
+    }
+
+    @Override
+    public void onActivityResult(int  requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            if(resultCode == Activity.RESULT_OK){
+                newImageUri = Uri.parse(data.getStringExtra("result"));
+
+                if(currentChat.getChatType().equals(Constants.USER_CHAT)){
+                    sendMessage(""+receiverId,null,newImageUri);
+                }else{
+                    sendMessage(null,""+receiverId,newImageUri);
+                }
+            }
+        }
+    }
+
+    public void sendMessage(String receiverUserId, String receiverRoomId,Uri uri){
+
+        TypedFile typedFile = new TypedFile("image/jpg", new File(uri.getPath()));
+        Log.d("aaaaaa sender_id"," es: "+mPreferences.getUserId());
+        Log.d("aaaaaa receiver_user_id"," es: "+receiverUserId);
+        Log.d("aaaaaa receiver_room_id"," es: "+receiverRoomId);
+        restClient.getWebservices().sendMessage(""+mPreferences.getUserId(),receiverUserId,receiverRoomId,typedFile,null, new Callback<JsonObject>() {
+            @Override
+            public void success(JsonObject jsonObject, Response response) {
+
+                Log.d("envio","aaaaa");
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+
+            }
+        });
+    }
+
+
+
 
 }
 

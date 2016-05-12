@@ -1,5 +1,7 @@
 package com.github.nkzawa.socketio.androidchat.Models;
 
+import com.github.nkzawa.socketio.androidchat.BuildConfig;
+import com.github.nkzawa.socketio.androidchat.Constants;
 import com.orm.SugarRecord;
 import com.orm.dsl.Ignore;
 
@@ -16,7 +18,9 @@ public class Message extends SugarRecord {
 
     private String message;
     private String username;
-    Chat chat;
+    private Chat chat;
+    private String fileUrl;
+    private String fileType;
 
     public int getType() {
         return mType;
@@ -34,6 +38,22 @@ public class Message extends SugarRecord {
         return chat;
     }
 
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    public String getFileUrl() {
+        return BuildConfig.BASE_URL+fileUrl;
+    }
+
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
+    }
+
     public void setChat(Chat chat) {
         this.chat = chat;
     }
@@ -42,6 +62,8 @@ public class Message extends SugarRecord {
         private final int mType;
         private String mUsername;
         private String mMessage;
+        private String mFileUrl;
+        private String mFileType;
         private Chat mChat;
 
         public Builder(int type) {
@@ -63,12 +85,26 @@ public class Message extends SugarRecord {
             return this;
         }
 
+        public Builder fileUrl(String fileUrl) {
+            mFileUrl = fileUrl;
+            return this;
+        }
+
+        public Builder fileType(String fileType) {
+            mFileType = fileType;
+            return this;
+        }
+
         public Message build() {
             Message message = new Message();
             message.mType = mType;
             message.username = mUsername;
             message.message = mMessage;
+            message.chat = mChat;
+            message.fileUrl = mFileUrl;
+            message.fileType = mFileType;
             return message;
+
         }
     }
 }

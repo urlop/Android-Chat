@@ -13,4 +13,6 @@ public interface Urls {
     String GET_ROOM_ID = "/rooms/{id}";
 
     String ADD_CONTACT = "/contacts/create_by_name";
+
+    String MESSAGE = "/messages";
 }

@@ -74,7 +74,7 @@ public class ContactsFragment extends Fragment {
     }
 
 
-    private void setContacts(){
+    public void setContacts(){
         contactsList = User.listAll(User.class);
 
         contactsAdapter = new ContactsAdapter(getActivity(), contactsList);

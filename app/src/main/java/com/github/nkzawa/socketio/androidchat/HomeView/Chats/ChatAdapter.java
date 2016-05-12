@@ -100,7 +100,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public void setTyping(Chat chat, boolean isTyping){
         for(int i=0 ; i<mChats.size(); i++){
-            if(chat.getReceiverId() ==  mChats.get(i).getReceiverId()){
+            if(chat.getId().equals(mChats.get(i).getId())){
                 mChats.get(i).setTyping(isTyping);
                 notifyItemChanged(i);
                 break;

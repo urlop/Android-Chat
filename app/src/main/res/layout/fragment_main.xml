@@ -42,6 +42,13 @@
                 android:src="@android:drawable/ic_menu_send"
                 android:contentDescription="@string/action_send"/>
 
+        <ImageButton
+            android:id="@+id/iv_btn_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_menu_camera"
+            android:contentDescription="@string/action_send"/>
+
     </LinearLayout>
 
 </LinearLayout>
