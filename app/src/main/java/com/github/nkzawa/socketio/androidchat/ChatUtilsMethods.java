@@ -24,15 +24,15 @@ public class ChatUtilsMethods {
         boolean isUserInsideChat = false;
 
         if(chat.getChatType().equals(Constants.ROOM_CHAT)){
-            if(gsonObject.has("room")){
-                int roomId = gsonObject.get("room").getAsInt();
+            if(gsonObject.has("receiver_room_id") && !gsonObject.get("receiver_room_id").isJsonNull()){
+                int roomId = gsonObject.get("receiver_room_id").getAsInt();
                 if(roomId == chat.getReceiverId()){
                     isUserInsideChat = true;
                 }
             }
         }else{
-            if(gsonObject.has("user")){
-                JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
+            if(gsonObject.has("sender")){
+                JsonObject jsonObjectSender = gsonObject.get("sender").getAsJsonObject();
                 int userId = jsonObjectSender.get("id").getAsInt();
                 if(userId == chat.getReceiverId()){
                     isUserInsideChat = true;
@@ -45,12 +45,12 @@ public class ChatUtilsMethods {
 
     public static Chat getChatFromNewMessage(JsonObject gsonObject){
         Chat newChat = null;
-        if(gsonObject.has("room")){
-            int roomId = gsonObject.get("room").getAsInt();
+        if(gsonObject.has("receiver_room_id") && !gsonObject.get("receiver_room_id").isJsonNull()){
+            int roomId = gsonObject.get("receiver_room_id").getAsInt();
             newChat = Chat.createChat(roomId,Constants.ROOM_CHAT);
         }else{
-            if(gsonObject.has("user")){
-                JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
+            if(gsonObject.has("sender")){
+                JsonObject jsonObjectSender = gsonObject.get("sender").getAsJsonObject();
                 int userId = jsonObjectSender.get("id").getAsInt();
                 newChat = Chat.createChat(userId,Constants.USER_CHAT);
             }
@@ -60,12 +60,12 @@ public class ChatUtilsMethods {
 
     public static Chat getChatFromMessage(JsonObject gsonObject){
         Chat newChat = null;
-        if(gsonObject.has("room")){
-            int roomId = gsonObject.get("room").getAsInt();
+        if(gsonObject.has("receiver_room_id") && !gsonObject.get("receiver_room_id").isJsonNull()){
+            int roomId = gsonObject.get("receiver_room_id").getAsInt();
             newChat = Chat.createChat(roomId,Constants.ROOM_CHAT);
         }else{
-            if(gsonObject.has("user")){
-                JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
+            if(gsonObject.has("sender")){
+                JsonObject jsonObjectSender = gsonObject.get("sender").getAsJsonObject();
                 int userId = jsonObjectSender.get("id").getAsInt();
                 newChat = Chat.createChat(userId,Constants.USER_CHAT);
             }

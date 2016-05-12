@@ -217,9 +217,8 @@ public class ChatFragment extends Fragment {
     }
 
 
-    protected void addMessage(String username, String message) {
-        mMessages.add(new Message.Builder(Message.TYPE_MESSAGE)
-                .username(username).message(message).build());
+    protected void addMessage(Message message) {
+        mMessages.add(message);
         mAdapter.notifyItemInserted(mMessages.size() - 1);
         scrollToBottom();
     }
@@ -254,16 +253,18 @@ public class ChatFragment extends Fragment {
         }
 
         mInputMessageView.setText("");
-        addMessage(mUsername, messageToSend);
-
-        // perform the sending message attempt.
-        Log.d("see enviaa", "tu :"+messageToSend + "-" + receiverId+ "-" + "user");
 
         Message message = new Message.Builder(Message.TYPE_MESSAGE).username(mUsername).message(messageToSend).build();
         message.setChat(currentChat);
         message.save();
         currentChat.setLastMessage(message.getUsername()+": "+message.getMessage());
         currentChat.save();
+
+        addMessage(message);
+
+        // perform the sending message attempt.
+        Log.d("see enviaa", "tu :"+messageToSend + "-" + receiverId+ "-" + "user");
+
 
         mSocket.emit("send message", messageToSend, receiverId,((ChatActivity)getActivity()).getTypeChat());
     }
@@ -366,25 +367,46 @@ public class ChatFragment extends Fragment {
                     JsonParser jsonParser = new JsonParser();
                     JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
 
-                    JsonObject userJsonObj = gsonObject.getAsJsonObject("user");
+                    JsonObject userJsonObj = gsonObject.getAsJsonObject("sender");
                     User user = User.parseUser(userJsonObj);
-                    String message = gsonObject.get("message").getAsString();
+                    String message = "";
+
+                    if(gsonObject.has("content") && !gsonObject.get("content").isJsonNull()){
+                        message = gsonObject.get("content").getAsString();
+                    }
+
+                    String fileUrl = null;
+                    if(gsonObject.has("media_file") && !gsonObject.get("media_file").isJsonNull()){
+                        fileUrl = gsonObject.get("media_file").getAsString();
+                    }
+                    String contentType = null;
+                    if(gsonObject.has("media_file_content_type") && !gsonObject.get("media_file_content_type").isJsonNull()){
+                        contentType = gsonObject.get("media_file_content_type").getAsString();
+                    }
+
+
+
+
 
                     Chat chatReceiver = currentChat;
 
+                    Message receiveMessage = new Message.Builder(Message.TYPE_MESSAGE).username(user.getName()).message(message).build();
+                    receiveMessage.setFileType(contentType);
+                    receiveMessage.setFileUrl(fileUrl);
+
                     if(ChatUtilsMethods.isUserInsideChat(gsonObject, currentChat)){
                         removeTyping(user.getName());
-                        addMessage(user.getName(), message);
+                        addMessage(receiveMessage);
                     }else{
                         chatReceiver = ChatUtilsMethods.getChatFromNewMessage(gsonObject);
                         Log.e("esssssss","esssss "+gsonObject);
                     }
 
-                    Message receiveMessage = new Message.Builder(Message.TYPE_MESSAGE).username(user.getName()).message(message).build();
-                    receiveMessage.setChat(chatReceiver);
-                    receiveMessage.save();
                     chatReceiver.setLastMessage(receiveMessage.getUsername()+": "+receiveMessage.getMessage());
                     chatReceiver.save();
+                    receiveMessage.setChat(chatReceiver);
+                    receiveMessage.save();
+
 
                     if(currentChat != chatReceiver){
                         ChatUtilsMethods.createNewMessageNotification(getActivity(),chatReceiver, receiveMessage);

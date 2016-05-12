@@ -195,18 +195,18 @@ public class HomeActivity extends ActionBarActivity {
                     String message;
                     JsonParser jsonParser = new JsonParser();
                     JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
-                    JsonObject userJsonObj = gsonObject.getAsJsonObject("user");
+                    JsonObject userJsonObj = gsonObject.getAsJsonObject("sender");
                     User user = User.parseUser(userJsonObj);
                     username = user.getName();
-                    message = gsonObject.get("message").getAsString();
+                    message = gsonObject.get("content").getAsString();
                     String lastMessage = "";
 
                     Chat chat = null;
-                    if(gsonObject.has("room")){
-                        chat = Chat.createChat(gsonObject.get("room").getAsInt(), Constants.ROOM_CHAT);
+                    if(gsonObject.has("receiver_room_id")){
+                        chat = Chat.createChat(gsonObject.get("receiver_room_id").getAsInt(), Constants.ROOM_CHAT);
                         lastMessage = ""+username+": "+message;
                     }else{
-                        if(gsonObject.has("user")){
+                        if(gsonObject.has("sender")){
                             List<User> users = User.find(User.class, "user_id = ?", ""+user.getUserId());
                             if (users.isEmpty()){
                                 user.save();
