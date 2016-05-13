@@ -39,7 +39,6 @@ import com.github.nkzawa.socketio.androidchat.retrofit.RestClient;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import retrofit.Callback;
@@ -50,7 +49,6 @@ import retrofit.mime.TypedFile;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -101,14 +99,8 @@ public class ChatFragment extends Fragment {
         setHasOptionsMenu(true);
         chatActivity = (ChatActivity) getActivity();
         mPreferences = PreferencesManager.getInstance(getActivity());
-
-        try {
-            mSocket = IO.socket(Constants.CHAT_SERVER_URL);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-
-
+        ChatApplication app = (ChatApplication) getActivity().getApplication();
+        mSocket = app.getSocket();
         mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
         mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
         mSocket.on("typing", onTyping);
