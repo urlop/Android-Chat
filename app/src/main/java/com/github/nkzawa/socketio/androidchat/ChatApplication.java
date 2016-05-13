@@ -5,10 +5,11 @@ import android.app.Application;
 import com.github.nkzawa.socketio.androidchat.Constants;
 import com.orm.SugarApp;
 
-import io.socket.client.IO;
-import io.socket.client.Socket;
 
 import java.net.URISyntaxException;
+
+import io.socket.client.IO;
+import io.socket.client.Socket;
 
 public class ChatApplication extends SugarApp {
 

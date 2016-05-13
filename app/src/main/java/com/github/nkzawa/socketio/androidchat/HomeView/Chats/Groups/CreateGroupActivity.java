@@ -9,6 +9,7 @@ import android.widget.EditText;
 
 import com.github.nkzawa.socketio.androidchat.ChatApplication;
 import com.github.nkzawa.socketio.androidchat.Constants;
+import com.github.nkzawa.socketio.androidchat.HomeView.HomeActivity;
 import com.github.nkzawa.socketio.androidchat.Models.Chat;
 import com.github.nkzawa.socketio.androidchat.Models.Room;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
@@ -39,8 +40,6 @@ public class CreateGroupActivity extends Activity {
         et_group_name = (EditText) findViewById(R.id.et_group_name);
         restClient = new RestClient();
 
-        ChatApplication app = (ChatApplication) getApplication();
-        mSocket = app.getSocket();
         setupVoid();
     }
 

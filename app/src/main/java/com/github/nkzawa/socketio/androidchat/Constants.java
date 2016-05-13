@@ -10,7 +10,7 @@ public class Constants {
     public static final String USER_CHAT = "user";
     public static final String ROOM_CHAT = "room";
 
-    public static final String MEDIA_IMAGE = "image/png";
+    public static final String MEDIA_IMAGE = "image/jpg";
     public static final String MEDIA_VIDEO = "video/mp4";
     public static final String MEDIA_AUDIO = "audio/mp3";
 

@@ -24,8 +24,8 @@ public class ChatUtilsMethods {
         boolean isUserInsideChat = false;
 
         if(chat.getChatType().equals(Constants.ROOM_CHAT)){
-            if(gsonObject.has("receiver_room_id") && !gsonObject.get("receiver_room_id").isJsonNull()){
-                int roomId = gsonObject.get("receiver_room_id").getAsInt();
+            if(gsonObject.has("receiver_room") && !gsonObject.get("receiver_room").isJsonNull()){
+                int roomId = gsonObject.get("receiver_room").getAsJsonObject().get("id").getAsInt();
                 if(roomId == chat.getReceiverId()){
                     isUserInsideChat = true;
                 }
@@ -45,8 +45,8 @@ public class ChatUtilsMethods {
 
     public static Chat getChatFromNewMessage(JsonObject gsonObject){
         Chat newChat = null;
-        if(gsonObject.has("receiver_room_id") && !gsonObject.get("receiver_room_id").isJsonNull()){
-            int roomId = gsonObject.get("receiver_room_id").getAsInt();
+        if(gsonObject.has("receiver_room") && !gsonObject.get("receiver_room").isJsonNull()){
+            int roomId = gsonObject.get("receiver_room").getAsJsonObject().get("id").getAsInt();
             newChat = Chat.createChat(roomId,Constants.ROOM_CHAT);
         }else{
             if(gsonObject.has("sender")){
@@ -60,8 +60,8 @@ public class ChatUtilsMethods {
 
     public static Chat getChatFromMessage(JsonObject gsonObject){
         Chat newChat = null;
-        if(gsonObject.has("receiver_room_id") && !gsonObject.get("receiver_room_id").isJsonNull()){
-            int roomId = gsonObject.get("receiver_room_id").getAsInt();
+        if(gsonObject.has("receiver_room") && !gsonObject.get("receiver_room").isJsonNull()){
+            int roomId = gsonObject.get("receiver_room").getAsJsonObject().get("id").getAsInt();
             newChat = Chat.createChat(roomId,Constants.ROOM_CHAT);
         }else{
             if(gsonObject.has("sender")){

@@ -56,7 +56,6 @@ public class ChatsFragment extends Fragment {
         mPreferences = PreferencesManager.getInstance(getActivity());
         ChatApplication app = (ChatApplication)getActivity().getApplication();
         mSocket = app.getSocket();
-        mSocket.connect();
     }
 
     @Override
@@ -121,17 +120,17 @@ public class ChatsFragment extends Fragment {
                     String messageTyping = "is typing";
                     Chat chat = null;
 
-                    if(gsonObject.has("room")){
-                        chat = Chat.getChat(gsonObject.get("room").getAsInt(), Constants.ROOM_CHAT);
+                    if(gsonObject.has("receiver_room")){
+                        chat = Chat.getChat(gsonObject.get("receiver_room").getAsJsonObject().get("id").getAsInt(), Constants.ROOM_CHAT);
                         String userName= "";
-                        if(gsonObject.has("user")){
-                            JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
+                        if(gsonObject.has("sender")){
+                            JsonObject jsonObjectSender = gsonObject.get("sender").getAsJsonObject();
                             userName = jsonObjectSender.get("name").getAsString();
                             messageTyping = userName + " is typing";
                         }
                     }else{
-                        if(gsonObject.has("user")){
-                            JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
+                        if(gsonObject.has("sender")){
+                            JsonObject jsonObjectSender = gsonObject.get("sender").getAsJsonObject();
                             chat = Chat.getChat(jsonObjectSender.get("id").getAsInt(), Constants.USER_CHAT);
                         }
                     }
@@ -152,17 +151,16 @@ public class ChatsFragment extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d("stop","aaaa"+args[0]);
                     JSONObject data = (JSONObject) args[0];
                     JsonParser jsonParser = new JsonParser();
                     JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
                     Chat chat = null;
 
-                    if(gsonObject.has("room")){
-                        chat = Chat.getChat(gsonObject.get("room").getAsInt(), Constants.ROOM_CHAT);
+                    if(gsonObject.has("receiver_room")){
+                        chat = Chat.getChat(gsonObject.get("receiver_room").getAsJsonObject().get("id").getAsInt(), Constants.ROOM_CHAT);
                     }else{
-                        if(gsonObject.has("user")){
-                            JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
+                        if(gsonObject.has("sender")){
+                            JsonObject jsonObjectSender = gsonObject.get("sender").getAsJsonObject();
                             chat = Chat.getChat(jsonObjectSender.get("id").getAsInt(), Constants.USER_CHAT);
                         }
                     }

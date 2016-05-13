@@ -26,7 +26,6 @@ import retrofit.client.Response;
 
 public class CreateUserActivity extends Activity {
 
-    private Socket mSocket;
     private EditText et_username;
     private Button btn_create;
     private RestClient restClient;
@@ -36,8 +35,6 @@ public class CreateUserActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_user);
-        ChatApplication app = (ChatApplication) getApplication();
-        mSocket = app.getSocket();
         restClient = new RestClient();
         mPreferences = PreferencesManager.getInstance(this);
         setupView ();

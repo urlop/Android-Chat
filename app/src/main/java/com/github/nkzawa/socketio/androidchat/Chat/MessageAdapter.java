@@ -57,9 +57,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         viewHolder.setMessage(message.getMessage());
         viewHolder.setUsername(message.getUsername());
 
-        if(message.getFileType() != null && message.getFileType().equals(Constants.MEDIA_IMAGE)){
-            viewHolder.setMessageImage(message.getFileUrl());
+
+        if(message.getType() == Message.TYPE_MESSAGE){
+            if(message.getFileType() != null && message.getFileType().equals(Constants.MEDIA_IMAGE)){
+                viewHolder.setMessageImage(message.getFileUrl());
+                viewHolder.iv_message_image.setVisibility(View.VISIBLE);
+            }else{
+                viewHolder.iv_message_image.setVisibility(View.GONE);
+            }
         }
+
     }
 
     @Override

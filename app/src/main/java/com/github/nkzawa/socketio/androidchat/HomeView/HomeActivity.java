@@ -40,8 +40,8 @@ public class HomeActivity extends ActionBarActivity {
     private RestClient restClient;
     private PreferencesManager mPreferences;
     private FragmentTabHost mTabHost;
-    public Socket mSocket;
-
+    private Socket mSocket;
+    private ChatApplication app;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +50,7 @@ public class HomeActivity extends ActionBarActivity {
 
         restClient = new RestClient();
         mPreferences = PreferencesManager.getInstance(this);
-        ChatApplication app = (ChatApplication)getApplication();
+        app = (ChatApplication)getApplication();
         mSocket = app.getSocket();
         mSocket.connect();
 
@@ -78,6 +78,7 @@ public class HomeActivity extends ActionBarActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.d("mejor","kjkaka");
         mSocket.disconnect();
     }
 
@@ -94,8 +95,6 @@ public class HomeActivity extends ActionBarActivity {
         mTabHost.addTab(
                 mTabHost.newTabSpec("Contacts").setIndicator("Contacts", null),
                 ContactsFragment.class, null);
-
-
     }
 
     public void getUserInfo(){
