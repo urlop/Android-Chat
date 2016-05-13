@@ -19,7 +19,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import io.socket.client.Socket;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;

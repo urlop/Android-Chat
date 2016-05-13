@@ -11,12 +11,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.androidchat.ChatApplication;
 import com.github.nkzawa.socketio.androidchat.Constants;
 import com.github.nkzawa.socketio.androidchat.HomeView.Chats.Groups.CreateGroupActivity;
 import com.github.nkzawa.socketio.androidchat.Models.Chat;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
+import com.github.nkzawa.socketio.client.Socket;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -25,8 +27,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
 
 public class ChatsFragment extends Fragment {
 

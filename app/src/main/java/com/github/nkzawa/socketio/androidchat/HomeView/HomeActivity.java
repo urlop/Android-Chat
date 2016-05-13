@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.androidchat.Chat.ChatFragment;
 import com.github.nkzawa.socketio.androidchat.ChatApplication;
 import com.github.nkzawa.socketio.androidchat.ChatUtilsMethods;
@@ -19,6 +20,7 @@ import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
 import com.github.nkzawa.socketio.androidchat.Models.User;
 import com.github.nkzawa.socketio.androidchat.retrofit.RestClient;
+import com.github.nkzawa.socketio.client.Socket;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -27,9 +29,6 @@ import com.google.gson.JsonParser;
 import org.json.JSONObject;
 
 import java.util.List;
-
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -62,7 +61,7 @@ public class HomeActivity extends ActionBarActivity {
     @Override
     public void onResume() {
         super.onResume();
-        mSocket.on(Socket.EVENT_CONNECT, onUserIsConnected);
+        mSocket.once(Socket.EVENT_CONNECT, onUserIsConnected);
         mSocket.on("activate user", onUserIsActivated);
         mSocket.on("message sent", onMessageSent);
     }

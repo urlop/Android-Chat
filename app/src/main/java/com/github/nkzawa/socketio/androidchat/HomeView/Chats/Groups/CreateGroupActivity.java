@@ -16,8 +16,6 @@ import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
 import com.github.nkzawa.socketio.androidchat.retrofit.RestClient;
 import com.google.gson.JsonObject;
-
-import io.socket.client.Socket;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -26,7 +24,6 @@ public class CreateGroupActivity extends Activity {
 
     Button btn_create;
     EditText et_group_name;
-    private Socket mSocket;
     private PreferencesManager mPreferences;
     private RestClient restClient;
 

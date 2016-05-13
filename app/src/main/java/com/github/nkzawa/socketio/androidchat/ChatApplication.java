@@ -3,13 +3,14 @@ package com.github.nkzawa.socketio.androidchat;
 import android.app.Application;
 
 import com.github.nkzawa.socketio.androidchat.Constants;
+import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
 import com.orm.SugarApp;
 
 
 import java.net.URISyntaxException;
 
-import io.socket.client.IO;
-import io.socket.client.Socket;
+
 
 public class ChatApplication extends SugarApp {
 

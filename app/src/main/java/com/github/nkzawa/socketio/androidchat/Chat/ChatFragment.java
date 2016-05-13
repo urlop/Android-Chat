@@ -25,6 +25,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.androidchat.Chat.Actions.AddFriendToGroupActivity;
 import com.github.nkzawa.socketio.androidchat.ChatApplication;
 import com.github.nkzawa.socketio.androidchat.Constants;
@@ -36,11 +37,9 @@ import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
 import com.github.nkzawa.socketio.androidchat.ChatUtilsMethods;
 import com.github.nkzawa.socketio.androidchat.retrofit.RestClient;
+import com.github.nkzawa.socketio.client.Socket;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -328,7 +327,7 @@ public class ChatFragment extends Fragment {
 
                     if(ChatUtilsMethods.isUserInsideChat(gsonObject, currentChat)){
                         if(gsonObject.has("sender")){
-                            JsonObject jsonObjectSender = gsonObject.get("sender").getAsJsonObject();
+                            JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
                             User user = User.parseUser(jsonObjectSender);
                             removeTyping(user.getName());
                         }
