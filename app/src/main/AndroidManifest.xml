@@ -3,13 +3,13 @@
     package="com.github.nkzawa.socketio.androidchat">
 
     <uses-permission android:name="android.permission.INTERNET" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
 
     <application
         android:name=".ChatApplication"
@@ -65,14 +65,17 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat" />
-        <activity android:name=".HomeView.Contacts.AddContactActivity"
+        <activity
+            android:name=".HomeView.Contacts.AddContactActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat" />
-        <activity android:name=".LibraryCropperActivity"
+        <activity
+            android:name=".LibraryCropperActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat" />
+        <activity android:name=".Chat.MessageWithImageActivity"></activity>
     </application>
 
 </manifest>

@@ -2,9 +2,12 @@ package com.github.nkzawa.socketio.androidchat.Chat;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -24,18 +27,17 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.androidchat.Chat.Actions.AddFriendToGroupActivity;
 import com.github.nkzawa.socketio.androidchat.ChatApplication;
 import com.github.nkzawa.socketio.androidchat.Constants;
-import com.github.nkzawa.socketio.androidchat.LibraryCropperActivity;
 import com.github.nkzawa.socketio.androidchat.Models.Chat;
 import com.github.nkzawa.socketio.androidchat.Models.Message;
 import com.github.nkzawa.socketio.androidchat.Models.User;
 import com.github.nkzawa.socketio.androidchat.PreferencesManager;
 import com.github.nkzawa.socketio.androidchat.R;
 import com.github.nkzawa.socketio.androidchat.ChatUtilsMethods;
+import com.github.nkzawa.socketio.androidchat.UtilsMethods;
 import com.github.nkzawa.socketio.androidchat.retrofit.RestClient;
 import com.github.nkzawa.socketio.client.Socket;
 import com.google.gson.JsonObject;
@@ -44,20 +46,20 @@ import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 import retrofit.mime.TypedFile;
-
 import org.json.JSONObject;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * A chat fragment containing messages view and input form.
  */
 public class ChatFragment extends Fragment {
 
-    private static final int REQUEST_LOGIN = 0;
+    private int REQUEST_CAMERA = 0, SELECT_FILE = 1;
+    private int EDIT_IMAGE = 2;
+    private String userChoosenTask;
+
 
     private static final int TYPING_TIMER_LENGTH = 600;
 
@@ -74,7 +76,6 @@ public class ChatFragment extends Fragment {
     private ChatActivity chatActivity;
     private Chat currentChat;
     private Uri newImageUri;
-    private int countCapturedImages;
     private RestClient restClient;
     private PreferencesManager mPreferences;
 
@@ -82,19 +83,10 @@ public class ChatFragment extends Fragment {
         super();
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
-        if(((ChatActivity)getActivity()).getTypeChat().equals(Constants.ROOM_CHAT)){
-            setHasOptionsMenu(true);
-        }
         super.onCreate(savedInstanceState);
-
         setHasOptionsMenu(true);
         chatActivity = (ChatActivity) getActivity();
         mPreferences = PreferencesManager.getInstance(getActivity());
@@ -107,7 +99,6 @@ public class ChatFragment extends Fragment {
         mSocket.on("message sent", onMessageSent);
         mUsername = mPreferences.getUserName();
         receiverId = ((ChatActivity)getActivity()).getReceiverId();
-        countCapturedImages = 0;
         restClient = new RestClient();
         mPreferences = PreferencesManager.getInstance(getActivity());
 
@@ -200,21 +191,15 @@ public class ChatFragment extends Fragment {
         iv_btn_image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                goToGetPicture();
+                userChoosenTask ="Take Photo";
+                if(UtilsMethods.checkPermission(getActivity())){
+                    cameraIntent();
+                }
             }
         });
 
 
     }
-
-
-    private void addLog(String message) {
-        mMessages.add(new Message.Builder(Message.TYPE_LOG)
-                .message(message).build());
-        mAdapter.notifyItemInserted(mMessages.size() - 1);
-        scrollToBottom();
-    }
-
 
     protected void addMessage(Message message) {
         mMessages.add(message);
@@ -327,7 +312,7 @@ public class ChatFragment extends Fragment {
 
                     if(ChatUtilsMethods.isUserInsideChat(gsonObject, currentChat)){
                         if(gsonObject.has("sender")){
-                            JsonObject jsonObjectSender = gsonObject.get("user").getAsJsonObject();
+                            JsonObject jsonObjectSender = gsonObject.get("sender").getAsJsonObject();
                             User user = User.parseUser(jsonObjectSender);
                             removeTyping(user.getName());
                         }
@@ -420,7 +405,12 @@ public class ChatFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.chat_actions, menu);
+        if(((ChatActivity)getActivity()).getTypeChat().equals(Constants.ROOM_CHAT)){
+            inflater.inflate(R.menu.chat_group_actions, menu);
+        }else{
+            inflater.inflate(R.menu.chat_actions, menu);
+        }
+
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -433,36 +423,60 @@ public class ChatFragment extends Fragment {
             i.putExtra("groupId",receiverId);
             startActivity(i);
             return true;
+        }else if(id == R.id.action_attachment_gallery){
+            userChoosenTask ="Choose from Library";
+            if(UtilsMethods.checkPermission(getActivity())){
+                galleryIntent();
+            }
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private void goToGetPicture(){
-        Intent intent = new Intent(getActivity(), LibraryCropperActivity.class);
-        intent.putExtra("count", countCapturedImages);
-        countCapturedImages++;
-        startActivityForResult(intent, 1);
+    private void goToEditImage(Intent data){
+        Intent intent = new Intent(getActivity(), MessageWithImageActivity.class);
+        if(userChoosenTask.equals("Take Photo")){
+            intent.putExtra("imageData",data.getExtras());
+        }else if(userChoosenTask.equals("Choose from Library")){
+            Log.d("data of media ", "aaaa "+data.getData());
+            intent.setData(data.getData());
+        }
+        startActivityForResult(intent, EDIT_IMAGE);
     }
 
     @Override
     public void onActivityResult(int  requestCode, int resultCode, Intent data) {
-        if (requestCode == 1) {
             if(resultCode == Activity.RESULT_OK){
-                newImageUri = Uri.parse(data.getStringExtra("result"));
-
-                if(currentChat.getChatType().equals(Constants.USER_CHAT)){
-                    sendMessage(""+receiverId,null,newImageUri);
-                }else{
-                    sendMessage(null,""+receiverId,newImageUri);
+                if (requestCode == SELECT_FILE){
+                    goToEditImage(data);
+                }
+                else if (requestCode == REQUEST_CAMERA){
+                    goToEditImage(data);
+                }
+                else if(requestCode == EDIT_IMAGE){
+                    newImageUri = Uri.parse(data.getStringExtra("result"));
+                    Log.d("aaaaa","aaaaaaa "+newImageUri);
+                    if(currentChat.getChatType().equals(Constants.USER_CHAT)){
+                        sendMessage(""+receiverId,null,newImageUri);
+                    }else{
+                        sendMessage(null,""+receiverId,newImageUri);
+                    }
                 }
             }
-        }
     }
 
     public void sendMessage(String receiverUserId, String receiverRoomId,Uri uri){
 
-        TypedFile typedFile = new TypedFile("image/jpg", new File(uri.getPath()));
+        Uri fileUri = null;
+        if(userChoosenTask.equals("Choose from Library")){
+
+            fileUri = uri;
+        }else{
+            fileUri = uri;
+        }
+
+        TypedFile typedFile = new TypedFile("image/jpg", new File(fileUri.getPath()));
         Log.d("aaaaaa sender_id"," es: "+mPreferences.getUserId());
         Log.d("aaaaaa receiver_user_id"," es: "+receiverUserId);
         Log.d("aaaaaa receiver_room_id"," es: "+receiverRoomId);
@@ -481,7 +495,34 @@ public class ChatFragment extends Fragment {
     }
 
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case UtilsMethods.MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if(userChoosenTask.equals("Take Photo"))
+                        cameraIntent();
+                    else if(userChoosenTask.equals("Choose from Library"))
+                        galleryIntent();
+                } else {
+                    //code for deny
+                }
+                break;
+        }
+    }
 
+    private void galleryIntent()
+    {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);//
+        startActivityForResult(Intent.createChooser(intent, "Select File"),SELECT_FILE);
+    }
 
+    private void cameraIntent()
+    {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(intent, REQUEST_CAMERA);
+    }
 }
 
