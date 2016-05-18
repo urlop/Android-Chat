@@ -29,6 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.androidchat.Chat.Actions.AddFriendToGroupActivity;
+import com.github.nkzawa.socketio.androidchat.Chat.DetailMedia.MessageWithImageActivity;
 import com.github.nkzawa.socketio.androidchat.ChatApplication;
 import com.github.nkzawa.socketio.androidchat.Constants;
 import com.github.nkzawa.socketio.androidchat.Models.Chat;
@@ -72,6 +73,7 @@ public class ChatFragment extends Fragment {
     private String mUsername;
     protected int receiverId;
     protected String messageToSend;
+    protected int typeOfFile;
     public Socket mSocket;
     private ChatActivity chatActivity;
     private Chat currentChat;
@@ -455,7 +457,11 @@ public class ChatFragment extends Fragment {
                     goToEditImage(data);
                 }
                 else if(requestCode == EDIT_IMAGE){
-                    newImageUri = Uri.parse(data.getStringExtra("result"));
+                    Bundle extras = data.getExtras();
+                    Log.d("aaaaaa","aaaaaa"+extras);
+                    newImageUri = Uri.parse(extras.getString("result"));
+                    messageToSend = extras.getString("message");
+                    typeOfFile = extras.getInt("typeFile");
                     Log.d("aaaaa","aaaaaaa "+newImageUri);
                     if(currentChat.getChatType().equals(Constants.USER_CHAT)){
                         sendMessage(""+receiverId,null,newImageUri);
@@ -467,20 +473,18 @@ public class ChatFragment extends Fragment {
     }
 
     public void sendMessage(String receiverUserId, String receiverRoomId,Uri uri){
+        String mediaType = null;
+        TypedFile typedFile = null;
 
-        Uri fileUri = null;
-        if(userChoosenTask.equals("Choose from Library")){
-
-            fileUri = uri;
+        if(typeOfFile == MessageWithImageActivity.IMAGE_FILE){
+            typedFile = new TypedFile("image/jpg", new File(uri.getPath()));
+            mediaType = Constants.MEDIA_IMAGE;
         }else{
-            fileUri = uri;
+            typedFile = new TypedFile("video/mp4", new File(uri.getPath()));
+            mediaType = Constants.MEDIA_VIDEO;
         }
 
-        TypedFile typedFile = new TypedFile("image/jpg", new File(fileUri.getPath()));
-        Log.d("aaaaaa sender_id"," es: "+mPreferences.getUserId());
-        Log.d("aaaaaa receiver_user_id"," es: "+receiverUserId);
-        Log.d("aaaaaa receiver_room_id"," es: "+receiverRoomId);
-        restClient.getWebservices().sendMessage(""+mPreferences.getUserId(),receiverUserId,receiverRoomId,typedFile,null, new Callback<JsonObject>() {
+        restClient.getWebservices().sendMessage(""+mPreferences.getUserId(),receiverUserId,receiverRoomId,typedFile,messageToSend, new Callback<JsonObject>() {
             @Override
             public void success(JsonObject jsonObject, Response response) {
 
@@ -511,10 +515,12 @@ public class ChatFragment extends Fragment {
         }
     }
 
+
+
     private void galleryIntent()
     {
         Intent intent = new Intent();
-        intent.setType("image/*");
+        intent.setType("image/* video/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);//
         startActivityForResult(Intent.createChooser(intent, "Select File"),SELECT_FILE);
     }

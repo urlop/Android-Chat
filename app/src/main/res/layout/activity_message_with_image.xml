@@ -7,35 +7,60 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.github.nkzawa.socketio.androidchat.Chat.MessageWithImageActivity"
+    tools:context=".Chat.DetailMedia.MessageWithImageActivity"
     android:orientation="vertical"
     android:weightSum="1">
 
-    <ImageView
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:id="@+id/iv_photo_to_send"
-        android:layout_weight="0.6" />
+        android:layout_weight="0.7"
+        android:visibility="gone"
+        android:id="@+id/ll_video">
+
+        <VideoView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/vv_video"
+            android:layout_gravity="center_horizontal" />
+    </LinearLayout>
 
     <LinearLayout
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:gravity="center_horizontal"
-        android:layout_weight="0.1">
+        android:layout_weight="0.7"
+        android:weightSum="1"
+        android:visibility="visible"
+        android:id="@+id/ll_image">
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="New Button"
-            android:id="@+id/button" />
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:id="@+id/iv_photo_to_send"
+            android:layout_weight="0.8" />
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="New Button"
-            android:id="@+id/button2"
-            android:layout_marginLeft="20dp" />
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:gravity="center_horizontal"
+            android:layout_weight="0.2">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="New Button"
+                android:id="@+id/button" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="New Button"
+                android:id="@+id/button2"
+                android:layout_marginLeft="20dp" />
+        </LinearLayout>
     </LinearLayout>
 
     <EditText

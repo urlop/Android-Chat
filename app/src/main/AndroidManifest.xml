@@ -75,7 +75,7 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat" />
-        <activity android:name=".Chat.MessageWithImageActivity"></activity>
+        <activity android:name=".Chat.DetailMedia.MessageWithImageActivity"></activity>
     </application>
 
 </manifest>
