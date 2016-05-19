@@ -1,6 +1,8 @@
 package com.github.nkzawa.socketio.androidchat;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -13,6 +15,7 @@ import android.os.Build;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.view.View;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -83,5 +86,39 @@ public class UtilsMethods {
         }
 
         return path;
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    public static void showProgress(final boolean show, Context context, View progress, View container){
+        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+        // for very easy animations. If available, use these APIs to fade-in
+        // the progress spinner.
+        try {
+            int shortAnimTime = context.getResources().getInteger(android.R.integer.config_shortAnimTime);
+            final View progressView = progress;
+            final View containerView = container;
+
+            if (container != null) {
+                containerView.setVisibility(show ? View.GONE : View.VISIBLE);
+                containerView.animate().setDuration(shortAnimTime).alpha(
+                        show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        containerView.setVisibility(show ? View.GONE : View.VISIBLE);
+                    }
+                });
+            }
+
+            progressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            progressView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    progressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }
