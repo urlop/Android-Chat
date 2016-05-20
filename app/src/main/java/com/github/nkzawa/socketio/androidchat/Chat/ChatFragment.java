@@ -32,6 +32,7 @@ import com.github.nkzawa.socketio.androidchat.Chat.Actions.AddFriendToGroupActiv
 import com.github.nkzawa.socketio.androidchat.Chat.DetailMedia.MessageWithImageActivity;
 import com.github.nkzawa.socketio.androidchat.ChatApplication;
 import com.github.nkzawa.socketio.androidchat.Constants;
+import com.github.nkzawa.socketio.androidchat.Models.Attachment;
 import com.github.nkzawa.socketio.androidchat.Models.Chat;
 import com.github.nkzawa.socketio.androidchat.Models.Message;
 import com.github.nkzawa.socketio.androidchat.Models.User;
@@ -367,22 +368,20 @@ public class ChatFragment extends Fragment {
                         message = gsonObject.get("content").getAsString();
                     }
 
-                    String fileUrl = null;
-                    if(gsonObject.has("media_file") && !gsonObject.get("media_file").isJsonNull()){
-                        fileUrl = gsonObject.get("media_file").getAsString();
-                    }
-                    String contentType = null;
-                    if(gsonObject.has("media_file_content_type") && !gsonObject.get("media_file_content_type").isJsonNull()){
-                        contentType = gsonObject.get("media_file_content_type").getAsString();
-                    }
+
 
                     Chat chatReceiver = currentChat;
 
                     Message receiveMessage = new Message.Builder(Message.TYPE_MESSAGE).username(user.getName()).message(message).build();
-                    receiveMessage.setFileType(contentType);
-                    receiveMessage.setFileUrl(fileUrl);
                     receiveMessage.setReceiverId(""+mPreferences.getUserId());
                     receiveMessage.setMessageStatus(Message.MESSAGE_RECEIVED);
+
+                    Attachment attachment = new Attachment();
+                    if(gsonObject.has("attachment") && !gsonObject.get("attachment").isJsonNull()){
+                        Log.d("si tiene attachment", " jojojoj");
+                        attachment = Attachment.parseAttachment(gsonObject.get("attachment").getAsJsonObject());
+                    }
+                    attachment.save();
 
                     if(ChatUtilsMethods.isUserInsideChat(gsonObject, currentChat)){
                         removeTyping(user.getName());
@@ -395,6 +394,7 @@ public class ChatFragment extends Fragment {
                     chatReceiver.setLastMessage(receiveMessage.getUsername()+": "+receiveMessage.getMessage());
                     chatReceiver.save();
                     receiveMessage.setChat(chatReceiver);
+                    receiveMessage.setAttachment(attachment);
                     receiveMessage.save();
 
 
@@ -474,10 +474,15 @@ public class ChatFragment extends Fragment {
 
                     Message message = new Message.Builder(Message.TYPE_MESSAGE).username(mUsername).message(messageToSend).build();
                     message.setChat(currentChat);
-                    message.setFileType(typeOfFile);
-                    message.setLocalFileUrl(newImageUri.getPath());
+
+                    Attachment attachment = new Attachment();
+                    attachment.setLocalFileUrl(newImageUri.getPath());
+                    attachment.setFileType(typeOfFile);
+                    attachment.save();
+
                     message.setReceiverId(""+receiverId);
                     message.setMessageStatus(Message.MESSAGE_NOT_SENT);
+                    message.setAttachment(attachment);
                     message.save();
                     currentChat.setLastMessage(message.getUsername()+": "+message.getMessage());
                     currentChat.save();

@@ -200,7 +200,7 @@ public class HomeActivity extends ActionBarActivity {
                     String lastMessage = "";
 
                     Chat chat = null;
-                    if(gsonObject.has("receiver_room_id")){
+                    if(gsonObject.has("receiver_room_id") && !gsonObject.get("receiver_room_id").isJsonNull()){
                         chat = Chat.createChat(gsonObject.get("receiver_room_id").getAsInt(), Constants.ROOM_CHAT);
                         lastMessage = ""+username+": "+message;
                     }else{

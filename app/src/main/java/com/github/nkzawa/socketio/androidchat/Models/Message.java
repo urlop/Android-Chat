@@ -27,10 +27,7 @@ public class Message extends SugarRecord {
     private Chat chat;
     private int messageStatus;
     private String receiverId;
-
-    private String localFileUrl;
-    private String fileType;
-    private String fileUrl;
+    private Attachment attachment;
 
 
     public int getType() {
@@ -69,30 +66,13 @@ public class Message extends SugarRecord {
         this.receiverId = receiverId;
     }
 
-    public String getLocalFileUrl() {
-        return localFileUrl;
+    public Attachment getAttachment() {
+        return attachment;
     }
 
-    public void setLocalFileUrl(String localFileUrl) {
-        this.localFileUrl = localFileUrl;
+    public void setAttachment(Attachment attachment) {
+        this.attachment = attachment;
     }
-
-    public String getFileType() {
-        return fileType;
-    }
-
-    public void setFileType(String fileType) {
-        this.fileType = fileType;
-    }
-
-    public String getFileUrl() {
-        return BuildConfig.BASE_URL+fileUrl;
-    }
-
-    public void setFileUrl(String fileUrl) {
-        this.fileUrl = fileUrl;
-    }
-
 
     public static class Builder {
         private final int mType;
@@ -100,8 +80,6 @@ public class Message extends SugarRecord {
         private String mMessage;
         private String mReceiverId;
         private Chat mChat;
-        private String mFileUrl;
-        private String mFileType;
         private int mMessageStatus;
 
         public Builder(int type) {
@@ -120,16 +98,6 @@ public class Message extends SugarRecord {
 
         public Builder chat(Chat chat) {
             mChat = chat;
-            return this;
-        }
-
-        public Builder fileUrl(String fileUrl) {
-            mFileUrl = fileUrl;
-            return this;
-        }
-
-        public Builder fileType(String fileType) {
-            mFileType = fileType;
             return this;
         }
 

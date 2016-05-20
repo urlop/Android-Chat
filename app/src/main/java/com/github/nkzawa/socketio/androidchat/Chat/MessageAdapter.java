@@ -22,6 +22,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.github.nkzawa.socketio.androidchat.Chat.DetailMedia.MessageWithImageActivity;
 import com.github.nkzawa.socketio.androidchat.Constants;
+import com.github.nkzawa.socketio.androidchat.Models.Attachment;
 import com.github.nkzawa.socketio.androidchat.Models.Message;
 import com.github.nkzawa.socketio.androidchat.R;
 import com.github.nkzawa.socketio.androidchat.UtilsMethods;
@@ -68,13 +69,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
         Message message = mMessages.get(position);
+        Attachment attachment = message.getAttachment();
         viewHolder.setMessage(message.getMessage());
         viewHolder.setUsername(message.getUsername());
 
 
-        if(message.getType() == Message.TYPE_MESSAGE){
-            if(message.getFileType() != null){
-                if(message.getFileType().equals(Constants.MEDIA_IMAGE)){
+        if(attachment != null){
+            if(attachment.getFileType() != null){
+                if(attachment.getFileType().equals(Constants.MEDIA_IMAGE)){
                     viewHolder.iv_message_image.setVisibility(View.VISIBLE);
                     if(message.getMessageStatus() == Message.MESSAGE_NOT_SENT){
                         sendMessage(message, viewHolder, position);
@@ -82,7 +84,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                             viewHolder.setMessageImage(message);
                     }
 
-                }else if(message.getFileType().equals(Constants.MEDIA_VIDEO)){
+                }else if(attachment.getFileType().equals(Constants.MEDIA_VIDEO)){
                     viewHolder.vv_video.setVisibility(View.VISIBLE);
                     if(message.getMessageStatus() == Message.MESSAGE_NOT_SENT){
                         sendMessage(message, viewHolder , position);
@@ -122,12 +124,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         }
 
         TypedFile typedFile = null;
-        final String typeFile = message.getFileType();
+        final String typeFile = message.getAttachment().getFileType();
 
         if(typeFile.equals(Constants.MEDIA_IMAGE)){
-            typedFile = new TypedFile("image/jpg", new File(message.getLocalFileUrl()));
+            typedFile = new TypedFile("image/jpg", new File(message.getAttachment().getLocalFileUrl()));
         }else{
-            typedFile = new TypedFile("video/mp4", new File(message.getLocalFileUrl()));
+            typedFile = new TypedFile("video/mp4", new File(message.getAttachment().getLocalFileUrl()));
         }
 
         context.getRestClient().getWebservices().sendMessage(""+context.getmPreferences().getUserId(),receiverUserId,receiverRoomId,typedFile,message.getMessage(), new Callback<JsonObject>() {
@@ -187,10 +189,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             UtilsMethods.showProgress(true, context.getActivity(), v_progress, null);
             String image_url = null;
 
-            if(message.getLocalFileUrl() != null){
-                image_url = message.getLocalFileUrl();
+            if(message.getAttachment().getLocalFileUrl() != null){
+                image_url = message.getAttachment().getLocalFileUrl();
             }else{
-                image_url = message.getFileUrl();
+                image_url = message.getAttachment().getFileUrl();
             }
 
             if(image_url != null){
@@ -221,10 +223,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
             String file_url = null;
 
-            if(message.getLocalFileUrl() != null){
-                file_url = message.getLocalFileUrl();
+            if(message.getAttachment().getLocalFileUrl() != null){
+                file_url = message.getAttachment().getLocalFileUrl();
             }else{
-                file_url = message.getFileUrl();
+                file_url = message.getAttachment().getFileUrl();
             }
 
             if(file_url != null){
