@@ -8,9 +8,15 @@ import com.orm.dsl.Ignore;
 public class Message extends SugarRecord {
 
     @Ignore
-    public static final int TYPE_MESSAGE = 0;
+    public static final int MESSAGE_NOT_SENT = 0;
     @Ignore
-    public static final int TYPE_LOG = 1;
+    public static final int MESSAGE_SENT = 1;
+    @Ignore
+    public static final int MESSAGE_RECEIVED = 2;
+
+
+    @Ignore
+    public static final int TYPE_MESSAGE = 0;
     @Ignore
     public static final int TYPE_ACTION = 2;
     @Ignore
@@ -19,19 +25,13 @@ public class Message extends SugarRecord {
     private String message;
     private String username;
     private Chat chat;
-    private String fileUrl;
+    private int messageStatus;
+    private String receiverId;
 
     private String localFileUrl;
     private String fileType;
-    private String receiverId;
+    private String fileUrl;
 
-    public String getLocalFileUrl() {
-        return localFileUrl;
-    }
-
-    public void setLocalFileUrl(String localFileUrl) {
-        this.localFileUrl = localFileUrl;
-    }
 
     public int getType() {
         return mType;
@@ -47,6 +47,34 @@ public class Message extends SugarRecord {
 
     public Chat getChat() {
         return chat;
+    }
+
+    public void setChat(Chat chat) {
+        this.chat = chat;
+    }
+
+    public int getMessageStatus() {
+        return messageStatus;
+    }
+
+    public void setMessageStatus(int messageStatus) {
+        this.messageStatus = messageStatus;
+    }
+
+    public String getReceiverId() {
+        return receiverId;
+    }
+
+    public void setReceiverId(String receiverId) {
+        this.receiverId = receiverId;
+    }
+
+    public String getLocalFileUrl() {
+        return localFileUrl;
+    }
+
+    public void setLocalFileUrl(String localFileUrl) {
+        this.localFileUrl = localFileUrl;
     }
 
     public String getFileType() {
@@ -65,26 +93,16 @@ public class Message extends SugarRecord {
         this.fileUrl = fileUrl;
     }
 
-    public String getReceiverId() {
-        return receiverId;
-    }
-
-    public void setReceiverId(String receiverId) {
-        this.receiverId = receiverId;
-    }
-
-    public void setChat(Chat chat) {
-        this.chat = chat;
-    }
 
     public static class Builder {
         private final int mType;
         private String mUsername;
         private String mMessage;
-        private String mFileUrl;
-        private String mFileType;
         private String mReceiverId;
         private Chat mChat;
+        private String mFileUrl;
+        private String mFileType;
+        private int mMessageStatus;
 
         public Builder(int type) {
             mType = type;
@@ -120,15 +138,19 @@ public class Message extends SugarRecord {
             return this;
         }
 
+        public Builder messageStatus(int messageStatus){
+            mMessageStatus = messageStatus;
+            return this;
+        }
+
         public Message build() {
             Message message = new Message();
             message.mType = mType;
             message.username = mUsername;
             message.message = mMessage;
             message.chat = mChat;
-            message.fileUrl = mFileUrl;
-            message.fileType = mFileType;
             message.receiverId = mReceiverId;
+            message.messageStatus = mMessageStatus;
             return message;
 
         }

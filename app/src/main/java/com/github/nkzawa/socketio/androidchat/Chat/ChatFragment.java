@@ -246,6 +246,8 @@ public class ChatFragment extends Fragment {
 
         Message message = new Message.Builder(Message.TYPE_MESSAGE).username(mUsername).message(messageToSend).build();
         message.setChat(currentChat);
+        message.setReceiverId(""+receiverId);
+        message.setMessageStatus(Message.MESSAGE_SENT);
         message.save();
         currentChat.setLastMessage(message.getUsername()+": "+message.getMessage());
         currentChat.save();
@@ -380,6 +382,7 @@ public class ChatFragment extends Fragment {
                     receiveMessage.setFileType(contentType);
                     receiveMessage.setFileUrl(fileUrl);
                     receiveMessage.setReceiverId(""+mPreferences.getUserId());
+                    receiveMessage.setMessageStatus(Message.MESSAGE_RECEIVED);
 
                     if(ChatUtilsMethods.isUserInsideChat(gsonObject, currentChat)){
                         removeTyping(user.getName());
@@ -474,6 +477,7 @@ public class ChatFragment extends Fragment {
                     message.setFileType(typeOfFile);
                     message.setLocalFileUrl(newImageUri.getPath());
                     message.setReceiverId(""+receiverId);
+                    message.setMessageStatus(Message.MESSAGE_NOT_SENT);
                     message.save();
                     currentChat.setLastMessage(message.getUsername()+": "+message.getMessage());
                     currentChat.save();

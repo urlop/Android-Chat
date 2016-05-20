@@ -55,9 +55,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         case Message.TYPE_MESSAGE:
             layout = R.layout.item_message;
             break;
-        case Message.TYPE_LOG:
-            layout = R.layout.item_log;
-            break;
         case Message.TYPE_ACTION:
             layout = R.layout.item_action;
             break;
@@ -79,18 +76,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             if(message.getFileType() != null){
                 if(message.getFileType().equals(Constants.MEDIA_IMAGE)){
                     viewHolder.iv_message_image.setVisibility(View.VISIBLE);
-                    if(message.getReceiverId().equals(""+context.getmPreferences().getUserId())){
-                        viewHolder.setMessageImage(message);
+                    if(message.getMessageStatus() == Message.MESSAGE_NOT_SENT){
+                        sendMessage(message, viewHolder, position);
                     }else{
-                        sendMessage(message, viewHolder);
+                            viewHolder.setMessageImage(message);
                     }
 
                 }else if(message.getFileType().equals(Constants.MEDIA_VIDEO)){
                     viewHolder.vv_video.setVisibility(View.VISIBLE);
-                    if(message.getReceiverId().equals(""+context.getmPreferences().getUserId())){
-                        viewHolder.setVideoView(message);
+                    if(message.getMessageStatus() == Message.MESSAGE_NOT_SENT){
+                        sendMessage(message, viewHolder , position);
                     }else{
-                        sendMessage(message, viewHolder);
+                        viewHolder.setVideoView(message);
                     }
                 }else{
                     viewHolder.iv_message_image.setVisibility(View.GONE);
@@ -111,7 +108,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     }
 
 
-    public void sendMessage(final Message message, final ViewHolder viewHolder){
+    public void sendMessage(final Message message, final ViewHolder viewHolder, final int position){
 
         UtilsMethods.showProgress(true, context.getActivity(), viewHolder.v_progress, null);
 
@@ -142,6 +139,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                 }else{
                     viewHolder.setVideoView(message);
                 }
+                message.setMessageStatus(Message.MESSAGE_SENT);
+                message.save();
+                notifyItemChanged(position);
             }
 
             @Override
@@ -184,7 +184,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         }
 
         private void setMessageImage(Message message) {
-
+            UtilsMethods.showProgress(true, context.getActivity(), v_progress, null);
             String image_url = null;
 
             if(message.getLocalFileUrl() != null){
@@ -202,12 +202,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                             @Override
                             public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
                                 iv_message_image.setImageResource(R.drawable.shadow_picture);
+                                UtilsMethods.showProgress(false, context.getActivity(), v_progress, null);
                                 return false;
                             }
 
                             @Override
                             public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
                                 iv_message_image.setImageDrawable(resource.getCurrent());
+                                UtilsMethods.showProgress(false, context.getActivity(), v_progress, null);
                                 return false;
                             }
                         }).into(iv_message_image);
