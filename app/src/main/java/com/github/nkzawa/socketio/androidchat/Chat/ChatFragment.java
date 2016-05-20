@@ -73,7 +73,6 @@ public class ChatFragment extends Fragment {
     private String mUsername;
     protected int receiverId;
     protected String messageToSend;
-    protected int typeOfFile;
     public Socket mSocket;
     private ChatActivity chatActivity;
     private Chat currentChat;
@@ -81,10 +80,15 @@ public class ChatFragment extends Fragment {
     private RestClient restClient;
     private PreferencesManager mPreferences;
 
-    public ChatFragment() {
-        super();
+    public ChatActivity getChatActivity() {
+        return chatActivity;
     }
-
+    public RestClient getRestClient() {
+        return restClient;
+    }
+    public PreferencesManager getmPreferences() {
+        return mPreferences;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -138,7 +142,7 @@ public class ChatFragment extends Fragment {
             Log.d("esss","miraaaame "+mMessages.size());
         }
 
-        mAdapter = new MessageAdapter(chatActivity, mMessages);
+        mAdapter = new MessageAdapter(this, mMessages);
         mMessagesView.setAdapter(mAdapter);
 
         mInputMessageView = (EditText) view.findViewById(R.id.message_input);
@@ -375,6 +379,7 @@ public class ChatFragment extends Fragment {
                     Message receiveMessage = new Message.Builder(Message.TYPE_MESSAGE).username(user.getName()).message(message).build();
                     receiveMessage.setFileType(contentType);
                     receiveMessage.setFileUrl(fileUrl);
+                    receiveMessage.setReceiverId(""+mPreferences.getUserId());
 
                     if(ChatUtilsMethods.isUserInsideChat(gsonObject, currentChat)){
                         removeTyping(user.getName());
@@ -461,41 +466,20 @@ public class ChatFragment extends Fragment {
                     Log.d("aaaaaa","aaaaaa"+extras);
                     newImageUri = Uri.parse(extras.getString("result"));
                     messageToSend = extras.getString("message");
-                    typeOfFile = extras.getInt("typeFile");
+                    String typeOfFile = extras.getString("typeFile");
                     Log.d("aaaaa","aaaaaaa "+newImageUri);
-                    if(currentChat.getChatType().equals(Constants.USER_CHAT)){
-                        sendMessage(""+receiverId,null,newImageUri);
-                    }else{
-                        sendMessage(null,""+receiverId,newImageUri);
-                    }
+
+                    Message message = new Message.Builder(Message.TYPE_MESSAGE).username(mUsername).message(messageToSend).build();
+                    message.setChat(currentChat);
+                    message.setFileType(typeOfFile);
+                    message.setLocalFileUrl(newImageUri.getPath());
+                    message.setReceiverId(""+receiverId);
+                    message.save();
+                    currentChat.setLastMessage(message.getUsername()+": "+message.getMessage());
+                    currentChat.save();
+                    addMessage(message);
                 }
             }
-    }
-
-    public void sendMessage(String receiverUserId, String receiverRoomId,Uri uri){
-        String mediaType = null;
-        TypedFile typedFile = null;
-
-        if(typeOfFile == MessageWithImageActivity.IMAGE_FILE){
-            typedFile = new TypedFile("image/jpg", new File(uri.getPath()));
-            mediaType = Constants.MEDIA_IMAGE;
-        }else{
-            typedFile = new TypedFile("video/mp4", new File(uri.getPath()));
-            mediaType = Constants.MEDIA_VIDEO;
-        }
-
-        restClient.getWebservices().sendMessage(""+mPreferences.getUserId(),receiverUserId,receiverRoomId,typedFile,messageToSend, new Callback<JsonObject>() {
-            @Override
-            public void success(JsonObject jsonObject, Response response) {
-
-                Log.d("envio","aaaaa");
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-
-            }
-        });
     }
 
 

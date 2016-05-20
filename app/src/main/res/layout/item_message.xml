@@ -30,11 +30,31 @@
                 android:singleLine="true"/>
     </LinearLayout>
 
-    <ImageView
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:id="@+id/iv_message_image"
-        android:layout_marginLeft="10dp"
-        android:visibility="gone" />
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/rl_video_container"
+        android:visibility="visible">
+
+        <ImageView
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:id="@+id/iv_message_image"
+            android:layout_marginLeft="10dp"
+            android:visibility="gone" />
+
+        <VideoView
+            android:id="@+id/vv_video"
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:visibility="gone" />
+
+        <ProgressBar android:id="@+id/v_progress" style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true" android:layout_centerVertical="true"
+            android:visibility="gone" />
+    </RelativeLayout>
 
 </LinearLayout>

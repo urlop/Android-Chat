@@ -20,7 +20,18 @@ public class Message extends SugarRecord {
     private String username;
     private Chat chat;
     private String fileUrl;
+
+    private String localFileUrl;
     private String fileType;
+    private String receiverId;
+
+    public String getLocalFileUrl() {
+        return localFileUrl;
+    }
+
+    public void setLocalFileUrl(String localFileUrl) {
+        this.localFileUrl = localFileUrl;
+    }
 
     public int getType() {
         return mType;
@@ -54,6 +65,14 @@ public class Message extends SugarRecord {
         this.fileUrl = fileUrl;
     }
 
+    public String getReceiverId() {
+        return receiverId;
+    }
+
+    public void setReceiverId(String receiverId) {
+        this.receiverId = receiverId;
+    }
+
     public void setChat(Chat chat) {
         this.chat = chat;
     }
@@ -64,6 +83,7 @@ public class Message extends SugarRecord {
         private String mMessage;
         private String mFileUrl;
         private String mFileType;
+        private String mReceiverId;
         private Chat mChat;
 
         public Builder(int type) {
@@ -95,6 +115,11 @@ public class Message extends SugarRecord {
             return this;
         }
 
+        public Builder receiverId(String receiverId){
+            mReceiverId = receiverId;
+            return this;
+        }
+
         public Message build() {
             Message message = new Message();
             message.mType = mType;
@@ -103,6 +128,7 @@ public class Message extends SugarRecord {
             message.chat = mChat;
             message.fileUrl = mFileUrl;
             message.fileType = mFileType;
+            message.receiverId = mReceiverId;
             return message;
 
         }

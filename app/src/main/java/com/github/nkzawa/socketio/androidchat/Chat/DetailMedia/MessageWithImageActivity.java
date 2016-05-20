@@ -20,6 +20,7 @@ import android.widget.MediaController;
 import android.widget.VideoView;
 
 import com.bumptech.glide.Glide;
+import com.github.nkzawa.socketio.androidchat.Constants;
 import com.github.nkzawa.socketio.androidchat.R;
 
 import java.io.ByteArrayOutputStream;
@@ -75,14 +76,17 @@ public class MessageWithImageActivity extends ActionBarActivity {
             public void onClick(View v) {
                 Intent returnIntent = new Intent();
 //                createImageFile(imageBytes);
+
+                if(typeFile == IMAGE_FILE){
+                    createImageFile(imageBytes);
+                    returnIntent.putExtra("result", fileToSend.toString());
+                    returnIntent.putExtra("typeFile", Constants.MEDIA_IMAGE);
+                }else{
+                    returnIntent.putExtra("result", getPathFromVideoUri(fileToSend));
+                    returnIntent.putExtra("typeFile", Constants.MEDIA_VIDEO);
+                }
+
                 if (fileToSend != null) {
-                    if(typeFile == IMAGE_FILE){
-                        createImageFile(imageBytes);
-                        returnIntent.putExtra("result", fileToSend.toString());
-                    }else{
-                        returnIntent.putExtra("result", getPathFromVideoUri(fileToSend));
-                    }
-                    returnIntent.putExtra("typeFile", typeFile);
                     returnIntent.putExtra("message", et_message.getText().toString());
                     setResult(Activity.RESULT_OK, returnIntent);
                     finish();

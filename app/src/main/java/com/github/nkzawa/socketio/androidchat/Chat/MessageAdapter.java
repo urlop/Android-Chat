@@ -1,31 +1,48 @@
 package com.github.nkzawa.socketio.androidchat.Chat;
 
 import android.content.Context;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.MediaController;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.VideoView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.github.nkzawa.socketio.androidchat.Chat.DetailMedia.MessageWithImageActivity;
 import com.github.nkzawa.socketio.androidchat.Constants;
 import com.github.nkzawa.socketio.androidchat.Models.Message;
 import com.github.nkzawa.socketio.androidchat.R;
+import com.github.nkzawa.socketio.androidchat.UtilsMethods;
+import com.google.gson.JsonObject;
 
+import java.io.File;
 import java.util.List;
+
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+import retrofit.mime.TypedFile;
 
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder> {
 
     private List<Message> mMessages;
     private int[] mUsernameColors;
-    private Context context;
+    private ChatFragment context;
 
-    public MessageAdapter(Context context, List<Message> messages) {
+    public MessageAdapter(ChatFragment context, List<Message> messages) {
         mMessages = messages;
         mUsernameColors = context.getResources().getIntArray(R.array.username_colors);
         this.context = context;
@@ -59,14 +76,28 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
 
         if(message.getType() == Message.TYPE_MESSAGE){
-            if(message.getFileType() != null && message.getFileType().equals(Constants.MEDIA_IMAGE)){
-                viewHolder.setMessageImage(message.getFileUrl());
-                viewHolder.iv_message_image.setVisibility(View.VISIBLE);
-            }else{
-                viewHolder.iv_message_image.setVisibility(View.GONE);
+            if(message.getFileType() != null){
+                if(message.getFileType().equals(Constants.MEDIA_IMAGE)){
+                    viewHolder.iv_message_image.setVisibility(View.VISIBLE);
+                    if(message.getReceiverId().equals(""+context.getmPreferences().getUserId())){
+                        viewHolder.setMessageImage(message);
+                    }else{
+                        sendMessage(message, viewHolder);
+                    }
+
+                }else if(message.getFileType().equals(Constants.MEDIA_VIDEO)){
+                    viewHolder.vv_video.setVisibility(View.VISIBLE);
+                    if(message.getReceiverId().equals(""+context.getmPreferences().getUserId())){
+                        viewHolder.setVideoView(message);
+                    }else{
+                        sendMessage(message, viewHolder);
+                    }
+                }else{
+                    viewHolder.iv_message_image.setVisibility(View.GONE);
+                    viewHolder.rl_video_container.setVisibility(View.GONE);
+                }
             }
         }
-
     }
 
     @Override
@@ -79,17 +110,66 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         return mMessages.get(position).getType();
     }
 
+
+    public void sendMessage(final Message message, final ViewHolder viewHolder){
+
+        UtilsMethods.showProgress(true, context.getActivity(), viewHolder.v_progress, null);
+
+        String receiverUserId = null;
+        String receiverRoomId = null;
+
+        if(context.getChatActivity().getTypeChat().equals(Constants.USER_CHAT)){
+            receiverUserId = ""+message.getReceiverId();
+        }else{
+            receiverRoomId = ""+message.getReceiverId();
+        }
+
+        TypedFile typedFile = null;
+        final String typeFile = message.getFileType();
+
+        if(typeFile.equals(Constants.MEDIA_IMAGE)){
+            typedFile = new TypedFile("image/jpg", new File(message.getLocalFileUrl()));
+        }else{
+            typedFile = new TypedFile("video/mp4", new File(message.getLocalFileUrl()));
+        }
+
+        context.getRestClient().getWebservices().sendMessage(""+context.getmPreferences().getUserId(),receiverUserId,receiverRoomId,typedFile,message.getMessage(), new Callback<JsonObject>() {
+            @Override
+            public void success(JsonObject jsonObject, Response response) {
+                UtilsMethods.showProgress(false, context.getActivity(), viewHolder.v_progress, null);
+                if(typeFile.equals(Constants.MEDIA_IMAGE)){
+                    viewHolder.setMessageImage(message);
+                }else{
+                    viewHolder.setVideoView(message);
+                }
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                UtilsMethods.showProgress(false, context.getActivity(), viewHolder.v_progress, null);
+            }
+        });
+    }
+
+
+
     public class ViewHolder extends RecyclerView.ViewHolder {
         private TextView mUsernameView;
         private TextView mMessageView;
         private ImageView iv_message_image;
+        private VideoView vv_video;
+        private RelativeLayout rl_video_container;
+        private ProgressBar v_progress;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
             mUsernameView = (TextView) itemView.findViewById(R.id.username);
             mMessageView = (TextView) itemView.findViewById(R.id.message);
+            vv_video = (VideoView) itemView.findViewById(R.id.vv_video);
             iv_message_image = (ImageView) itemView.findViewById(R.id.iv_message_image);
+            rl_video_container = (RelativeLayout) itemView.findViewById(R.id.rl_video_container);
+            v_progress = (ProgressBar) itemView.findViewById(R.id.v_progress);
         }
 
         public void setUsername(String username) {
@@ -103,24 +183,72 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             mMessageView.setText(message);
         }
 
-        private void setMessageImage(String image_url) {
-            Glide.with(context)
-                    .load(image_url)
-                    .placeholder(R.drawable.shadow_picture)
-                    .error(R.drawable.shadow_picture)
-                    .listener(new RequestListener<String, GlideDrawable>() {
-                        @Override
-                        public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                            iv_message_image.setImageResource(R.drawable.shadow_picture);
-                            return false;
-                        }
+        private void setMessageImage(Message message) {
 
+            String image_url = null;
+
+            if(message.getLocalFileUrl() != null){
+                image_url = message.getLocalFileUrl();
+            }else{
+                image_url = message.getFileUrl();
+            }
+
+            if(image_url != null){
+                Glide.with(context)
+                        .load(image_url)
+                        .placeholder(R.drawable.shadow_picture)
+                        .error(R.drawable.shadow_picture)
+                        .listener(new RequestListener<String, GlideDrawable>() {
+                            @Override
+                            public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                                iv_message_image.setImageResource(R.drawable.shadow_picture);
+                                return false;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                                iv_message_image.setImageDrawable(resource.getCurrent());
+                                return false;
+                            }
+                        }).into(iv_message_image);
+            }
+
+        }
+
+        private void setVideoView(Message message){
+
+            String file_url = null;
+
+            if(message.getLocalFileUrl() != null){
+                file_url = message.getLocalFileUrl();
+            }else{
+                file_url = message.getFileUrl();
+            }
+
+            if(file_url != null){
+                UtilsMethods.showProgress(true, context.getActivity(), v_progress, null);
+
+                try {
+                    MediaController mediaController = new MediaController(context.getActivity());
+                    mediaController.setAnchorView(vv_video);
+                    Uri video = Uri.parse(file_url);
+                    vv_video.setMediaController(mediaController);
+                    vv_video.setVideoURI(video);
+
+                    vv_video.start();
+
+                    vv_video.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                         @Override
-                        public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                            iv_message_image.setImageDrawable(resource.getCurrent());
-                            return false;
+                        public void onPrepared(MediaPlayer mp) {
+                            UtilsMethods.showProgress(false, context.getActivity(), v_progress, null);
                         }
-                    }).into(iv_message_image);
+                    });
+
+                } catch (Exception e) {
+                    Toast.makeText(context.getActivity(), context.getActivity().getString(R.string.connection_error), Toast.LENGTH_SHORT).show();
+                }
+            }
+
         }
 
         private int getUsernameColor(String username) {
