@@ -3,6 +3,7 @@ package com.github.nkzawa.socketio.androidchat.HomeView;
 import android.support.v4.app.FragmentTabHost;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -13,6 +14,7 @@ import com.github.nkzawa.socketio.androidchat.ChatUtilsMethods;
 import com.github.nkzawa.socketio.androidchat.Constants;
 import com.github.nkzawa.socketio.androidchat.HomeView.Chats.ChatsFragment;
 import com.github.nkzawa.socketio.androidchat.HomeView.Contacts.ContactsFragment;
+import com.github.nkzawa.socketio.androidchat.Models.Attachment;
 import com.github.nkzawa.socketio.androidchat.Models.Chat;
 import com.github.nkzawa.socketio.androidchat.Models.Message;
 import com.github.nkzawa.socketio.androidchat.Models.Room;
@@ -33,7 +35,7 @@ import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-public class HomeActivity extends ActionBarActivity {
+public class HomeActivity extends AppCompatActivity {
 
 
     private RestClient restClient;
@@ -41,17 +43,25 @@ public class HomeActivity extends ActionBarActivity {
     private FragmentTabHost mTabHost;
     private Socket mSocket;
     private ChatApplication app;
+    private static Boolean check_running_mode;
+    private boolean openChatActivity = false;
+
+    public static Boolean getCheck_running_mode() {
+        return check_running_mode;
+    }
+    public void setOpenChatActivity(boolean openChatActivity) {
+        this.openChatActivity = openChatActivity;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
+        check_running_mode = true;
         restClient = new RestClient();
         mPreferences = PreferencesManager.getInstance(this);
         app = (ChatApplication)getApplication();
         mSocket = app.getSocket();
-        mSocket.connect();
 
         setupView();
         getUserInfo();
@@ -61,23 +71,37 @@ public class HomeActivity extends ActionBarActivity {
     @Override
     public void onResume() {
         super.onResume();
+        openChatActivity = false;
+        check_running_mode = true;
         mSocket.once(Socket.EVENT_CONNECT, onUserIsConnected);
         mSocket.on("activate user", onUserIsActivated);
         mSocket.on("message sent", onMessageSent);
+
+        if(!mSocket.connected()){
+            mSocket.connect();
+        }
+
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mSocket.off(Socket.EVENT_CONNECT_ERROR, onUserIsConnected);
-        mSocket.off("activate user", onUserIsActivated);
-        mSocket.off("message sent", onMessageSent);
+        check_running_mode = false;
+        mSocket.off(Socket.EVENT_CONNECT, onUserIsConnected);
+
+        if(openChatActivity){
+            mSocket.off("activate user", onUserIsActivated);
+            mSocket.off("message sent", onMessageSent);
+        }
+
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d("mejor","kjkaka");
+        mSocket.off("activate user", onUserIsActivated);
+        mSocket.off("message sent", onMessageSent);
         mSocket.disconnect();
     }
 
@@ -199,6 +223,14 @@ public class HomeActivity extends ActionBarActivity {
                     message = gsonObject.get("content").getAsString();
                     String lastMessage = "";
 
+                    Attachment attachment = new Attachment();
+                    if(gsonObject.has("attachment") && !gsonObject.get("attachment").isJsonNull()){
+                        Log.d("si tiene attachment", " jojojoj");
+                        attachment = Attachment.parseAttachment(gsonObject.get("attachment").getAsJsonObject());
+                    }
+                    attachment.save();
+
+
                     Chat chat = null;
                     if(gsonObject.has("receiver_room_id") && !gsonObject.get("receiver_room_id").isJsonNull()){
                         chat = Chat.createChat(gsonObject.get("receiver_room_id").getAsInt(), Constants.ROOM_CHAT);
@@ -224,6 +256,7 @@ public class HomeActivity extends ActionBarActivity {
 
                     Message receiveMessage = new Message.Builder(Message.TYPE_MESSAGE).username(username).message(message).build();
                     receiveMessage.setChat(chat);
+                    receiveMessage.setAttachment(attachment);
                     receiveMessage.save();
 
                     if(ChatsFragment.class.isInstance(getSupportFragmentManager().findFragmentByTag("Chat"))){

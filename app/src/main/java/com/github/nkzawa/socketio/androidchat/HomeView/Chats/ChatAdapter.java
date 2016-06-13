@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.github.nkzawa.socketio.androidchat.Chat.ChatActivity;
 import com.github.nkzawa.socketio.androidchat.Constants;
+import com.github.nkzawa.socketio.androidchat.HomeView.HomeActivity;
 import com.github.nkzawa.socketio.androidchat.Models.Chat;
 import com.github.nkzawa.socketio.androidchat.Models.Room;
 import com.github.nkzawa.socketio.androidchat.Models.User;
@@ -44,39 +45,32 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, final int position) {
         Chat chat = mChats.get(position);
 
-        UserViewHolder userViewHolder = (UserViewHolder)viewHolder;
-        Object receiver = chat.getReceiver();
+        final UserViewHolder userViewHolder = (UserViewHolder)viewHolder;
+        final Object receiver = chat.getReceiver();
+
+
+        final Intent intent = new Intent(context.getActivity(), ChatActivity.class);
         if(User.class.isInstance(receiver)){
             final User user = (User)receiver;
-
             userViewHolder.setUsername(""+user.getName());
-
-            userViewHolder.ll_user.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(context.getActivity(), ChatActivity.class);
-                    intent.putExtra("receiverId", user.getUserId());
-                    intent.putExtra("typeChat", Constants.USER_CHAT);
-                    intent.putExtra("position",position);
-                    context.startActivityForResult(intent, 1);
-                }
-            });
+            intent.putExtra("receiverId", user.getUserId());
+            intent.putExtra("typeChat", Constants.USER_CHAT);
+            intent.putExtra("position",position);
         }else{
             final Room room = (Room)receiver;
-
             userViewHolder.setUsername(""+room.getName());
-
-            userViewHolder.ll_user.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(context.getActivity(), ChatActivity.class);
-                    intent.putExtra("receiverId", room.getRoomId());
-                    intent.putExtra("typeChat", Constants.ROOM_CHAT);
-                    intent.putExtra("position",position);
-                    context.startActivityForResult(intent, 1);
-                }
-            });
+            intent.putExtra("receiverId", room.getRoomId());
+            intent.putExtra("typeChat", Constants.ROOM_CHAT);
+            intent.putExtra("position",position);
         }
+
+        userViewHolder.ll_user.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                context.startActivityForResult(intent, 1);
+                ((HomeActivity)context.getActivity()).setOpenChatActivity(true);
+            }
+        });
 
 
         if(chat.isTyping()){

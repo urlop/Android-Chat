@@ -172,7 +172,7 @@ public class MessageWithImageActivity extends ActionBarActivity {
     }
 
 
-    // this Does not work
+    // this Does not work, this work only for images or videos of the gallery
     private String getPathFromImageUri(Uri selectedImageUri){
         String selectedImagePath = null;
         Cursor cursor = getContentResolver().query(

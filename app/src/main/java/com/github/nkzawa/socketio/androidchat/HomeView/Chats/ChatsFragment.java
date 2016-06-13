@@ -72,6 +72,7 @@ public class ChatsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        Log.d("mlaalalla", "asdasdad");
         mSocket.on("typing", onTyping);
         mSocket.on("stop typing", onStopTyping);
     }
@@ -79,12 +80,15 @@ public class ChatsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+
         mSocket.off("typing", onTyping);
+        mSocket.off("stop typing", onStopTyping);
     }
 
 
     @Override
     public void onDestroy() {
+
         super.onDestroy();
     }
 

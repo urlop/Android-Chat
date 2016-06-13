@@ -99,11 +99,6 @@ public class ChatFragment extends Fragment {
         mPreferences = PreferencesManager.getInstance(getActivity());
         ChatApplication app = (ChatApplication) getActivity().getApplication();
         mSocket = app.getSocket();
-        mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        mSocket.on("typing", onTyping);
-        mSocket.on("stop typing", onStopTyping);
-        mSocket.on("message sent", onMessageSent);
         mUsername = mPreferences.getUserName();
         receiverId = ((ChatActivity)getActivity()).getReceiverId();
         restClient = new RestClient();
@@ -118,16 +113,35 @@ public class ChatFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        mSocket.on("typing", onTyping);
+        mSocket.on("stop typing", onStopTyping);
+        mSocket.on("message sent", onMessageSent);
+    }
+
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        mSocket.off("typing", onTyping);
+        mSocket.off("stop typing", onStopTyping);
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
-
         mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
         mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
         mSocket.off("typing", onTyping);
         mSocket.off("stop typing", onStopTyping);
         mSocket.off("message sent", onMessageSent);
-
     }
+
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -170,8 +184,10 @@ public class ChatFragment extends Fragment {
                 if (!mTyping) {
                     mTyping = true;
                     if(chatActivity.getTypeChat().equals(Constants.USER_CHAT)){
+                        Log.d("chat user ", "user "  +receiverId);
                         mSocket.emit("typing",receiverId,"user");
                     }else{
+                        Log.d("chat user ", "room "  +receiverId);
                         mSocket.emit("typing",receiverId,"room");
                     }
 
@@ -368,8 +384,6 @@ public class ChatFragment extends Fragment {
                         message = gsonObject.get("content").getAsString();
                     }
 
-
-
                     Chat chatReceiver = currentChat;
 
                     Message receiveMessage = new Message.Builder(Message.TYPE_MESSAGE).username(user.getName()).message(message).build();
@@ -504,7 +518,7 @@ public class ChatFragment extends Fragment {
                 } else {
                     //code for deny
                 }
-                break;
+            break;
         }
     }
 
@@ -512,10 +526,9 @@ public class ChatFragment extends Fragment {
 
     private void galleryIntent()
     {
-        Intent intent = new Intent();
-        intent.setType("image/* video/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);//
-        startActivityForResult(Intent.createChooser(intent, "Select File"),SELECT_FILE);
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK);
+        galleryIntent.setType("image/* video/*");
+        startActivityForResult(Intent.createChooser(galleryIntent, "Select File"),SELECT_FILE);
     }
 
     private void cameraIntent()
