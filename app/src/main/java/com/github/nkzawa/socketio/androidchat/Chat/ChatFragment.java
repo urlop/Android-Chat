@@ -148,7 +148,10 @@ public class ChatFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         mMessagesView = (RecyclerView) view.findViewById(R.id.messages);
-        mMessagesView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
+        linearLayoutManager.setReverseLayout(true);
+        linearLayoutManager.setStackFromEnd(false);
+        mMessagesView.setLayoutManager(linearLayoutManager);
 
 
         currentChat = Chat.createChat(receiverId,((ChatActivity)getActivity()).getTypeChat());
@@ -225,15 +228,15 @@ public class ChatFragment extends Fragment {
     }
 
     protected void addMessage(Message message) {
-        mMessages.add(message);
-        mAdapter.notifyItemInserted(mMessages.size() - 1);
+        mMessages.add(0,message);
+        mAdapter.notifyItemInserted(0);
         scrollToBottom();
     }
 
     private void addTyping(String username) {
-        mMessages.add(new Message.Builder(Message.TYPE_ACTION)
+        mMessages.add(0,new Message.Builder(Message.TYPE_ACTION)
                 .username(username).build());
-        mAdapter.notifyItemInserted(mMessages.size() - 1);
+        mAdapter.notifyItemInserted(0);
         scrollToBottom();
     }
 
@@ -281,7 +284,7 @@ public class ChatFragment extends Fragment {
 
 
     private void scrollToBottom() {
-        mMessagesView.scrollToPosition(mAdapter.getItemCount() - 1);
+        mMessagesView.scrollToPosition(0);
     }
 
     private Emitter.Listener onConnectError = new Emitter.Listener() {

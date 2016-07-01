@@ -89,7 +89,7 @@ public class Chat extends SugarRecord {
     }
 
     public List<Message> getMessages() {
-        return Message.find(Message.class, "chat = ?", ""+getId());
+        return Message.find(Message.class, "chat = ?",new String[]{""+getId()},null, "id DESC",null);
     }
 
 
