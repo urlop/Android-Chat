@@ -99,7 +99,6 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d("mejor","kjkaka");
         mSocket.off("activate user", onUserIsActivated);
         mSocket.off("message sent", onMessageSent);
         mSocket.disconnect();
@@ -127,8 +126,7 @@ public class HomeActivity extends AppCompatActivity {
 
                 User.deleteAll(User.class);
                 Room.deleteAll(Room.class);
-
-                Log.d("response", "resoibes "+jsonObject.toString());
+                Log.d("response", "received: "+jsonObject.toString());
                 JsonObject me = jsonObject.get("me").getAsJsonObject();
 
                 String name = me.get("name").getAsString();
@@ -171,7 +169,7 @@ public class HomeActivity extends AppCompatActivity {
 
 
     public void connectToServer(){
-        Log.d("el socket es :", "ooo : "+mSocket.id());
+        Log.d("current socket :", " "+mSocket.id());
         mSocket.emit("activate user", mPreferences.getUserId(), mSocket.id());
     }
 
@@ -195,7 +193,7 @@ public class HomeActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d("user connected", " es : "+args.toString());
+                    Log.d("user connected", " response: "+args.toString());
                     connectToServer();
 
                 }
@@ -208,7 +206,7 @@ public class HomeActivity extends AppCompatActivity {
         @Override
         public void call(final Object... args) {
 
-            Log.d("aaaa","antes1 "+args[0]);
+            Log.d("message received: "," "+args[0]);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -225,7 +223,6 @@ public class HomeActivity extends AppCompatActivity {
 
                     Attachment attachment = new Attachment();
                     if(gsonObject.has("attachment") && !gsonObject.get("attachment").isJsonNull()){
-                        Log.d("si tiene attachment", " jojojoj");
                         attachment = Attachment.parseAttachment(gsonObject.get("attachment").getAsJsonObject());
                     }
                     attachment.save();

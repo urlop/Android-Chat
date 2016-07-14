@@ -40,7 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="SignUp"
+            android:text="@string/action_sign_up"
             android:id="@+id/tv_singup"
             android:layout_gravity="center_horizontal" />
 

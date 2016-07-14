@@ -5,12 +5,11 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-
+import android.util.Log;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.androidchat.ChatApplication;
 import com.github.nkzawa.socketio.androidchat.Constants;
@@ -21,9 +20,7 @@ import com.github.nkzawa.socketio.androidchat.R;
 import com.github.nkzawa.socketio.client.Socket;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,9 +69,14 @@ public class ChatsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        Log.d("mlaalalla", "asdasdad");
+
+        /**
+         * Channels to receive the information when some user typing or stop Typing
+         */
         mSocket.on("typing", onTyping);
         mSocket.on("stop typing", onStopTyping);
+
+
     }
 
     @Override
@@ -117,7 +119,7 @@ public class ChatsFragment extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d("typing","aaaa"+args[0]);
+                    Log.d("typing","response: "+args[0]);
                     JSONObject data = (JSONObject) args[0];
                     JsonParser jsonParser = new JsonParser();
                     JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
@@ -155,6 +157,7 @@ public class ChatsFragment extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    Log.d("stopTyping","response: "+args[0]);
                     JSONObject data = (JSONObject) args[0];
                     JsonParser jsonParser = new JsonParser();
                     JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());

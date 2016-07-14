@@ -18,7 +18,7 @@
             android:id="@+id/et_username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Friends UserName"
+            android:hint="@string/place_holde_friend_usernamer"
             android:imeActionId="@+id/login"
             android:imeActionLabel="@string/action_sign_in_short"
             android:imeOptions="actionUnspecified"
@@ -32,7 +32,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="add contact"
+            android:text="@string/btn_add_contact"
             android:textStyle="bold"/>
 
     </LinearLayout>

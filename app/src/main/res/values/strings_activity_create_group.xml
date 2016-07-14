@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="label_name_group">Name Group</string>
+    <string name="btn_create_group">Create</string>
+
+</resources>

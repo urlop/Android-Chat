@@ -119,8 +119,6 @@ public class MessageWithImageActivity extends ActionBarActivity {
     private void onSelectFromGalleryResult(Intent data) {
         fileToSend = data.getData();
 //        File file= new File(getRealPathFromURI(fileToSend));
-
-        Log.d("asdsdsadsad", "adasdasdad"+fileToSend.getPath());
         typeFile = typeMediaFile(fileToSend);
         if(typeFile == IMAGE_FILE){
             ll_video.setVisibility(View.GONE);

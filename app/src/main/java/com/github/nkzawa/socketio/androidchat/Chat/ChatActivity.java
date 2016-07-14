@@ -106,7 +106,7 @@ public class ChatActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d("user connected", " es : "+args.toString());
+                    Log.d("user connected: ", ""+args.toString());
                     connectToServer();
 
                 }
@@ -115,7 +115,7 @@ public class ChatActivity extends AppCompatActivity {
     };
 
     public void connectToServer(){
-        Log.d("el socket es :", "ooo : "+mSocket.id());
+        Log.d("current socket id: ", ""+mSocket.id());
         mSocket.emit("activate user", mPreferences.getUserId(), mSocket.id());
     }
 
@@ -123,8 +123,6 @@ public class ChatActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-
-        Log.d("mejor","kjkaka");
         if(HomeActivity.getCheck_running_mode() == null){
             mSocket.disconnect();
             Intent intent = new Intent(this,HomeActivity.class);

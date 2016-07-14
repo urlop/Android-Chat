@@ -51,13 +51,13 @@
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="New Button"
+                android:text="@string/crop_image"
                 android:id="@+id/button" />
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="New Button"
+                android:text="@string/edit_image"
                 android:id="@+id/button2"
                 android:layout_marginLeft="20dp" />
         </LinearLayout>
@@ -81,7 +81,7 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="New Button"
+            android:text="@string/send_message"
             android:id="@+id/btn_send" />
     </LinearLayout>
 

@@ -157,7 +157,6 @@ public class ChatFragment extends Fragment {
         currentChat = Chat.createChat(receiverId,((ChatActivity)getActivity()).getTypeChat());
         if(currentChat != null){
             mMessages = currentChat.getMessages();
-            Log.d("esss","miraaaame "+mMessages.size());
         }
 
         mAdapter = new MessageAdapter(this, mMessages);
@@ -187,10 +186,8 @@ public class ChatFragment extends Fragment {
                 if (!mTyping) {
                     mTyping = true;
                     if(chatActivity.getTypeChat().equals(Constants.USER_CHAT)){
-                        Log.d("chat user ", "user "  +receiverId);
                         mSocket.emit("typing",receiverId,"user");
                     }else{
-                        Log.d("chat user ", "room "  +receiverId);
                         mSocket.emit("typing",receiverId,"room");
                     }
 
@@ -275,7 +272,7 @@ public class ChatFragment extends Fragment {
         addMessage(message);
 
         // perform the sending message attempt.
-        Log.d("see enviaa", "tu :"+messageToSend + "-" + receiverId+ "-" + "user");
+        Log.d("message to send: ", ""+messageToSend + "-" + receiverId+ "-" + "user");
 
 
         mSocket.emit("send message", messageToSend, receiverId,((ChatActivity)getActivity()).getTypeChat());
@@ -308,8 +305,7 @@ public class ChatFragment extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-
-                    Log.d("typing","aaaa"+args[0]);
+                    Log.d("typing result: ",""+args[0]);
                     JSONObject data = (JSONObject) args[0];
                     JsonParser jsonParser = new JsonParser();
                     JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
@@ -332,8 +328,7 @@ public class ChatFragment extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-
-                    Log.d("typing","aaaa"+args[0]);
+                    Log.d("stop typing result ",""+args[0]);
                     JSONObject data = (JSONObject) args[0];
                     JsonParser jsonParser = new JsonParser();
                     JsonObject gsonObject = (JsonObject)jsonParser.parse(data.toString());
@@ -371,7 +366,7 @@ public class ChatFragment extends Fragment {
         @Override
         public void call(final Object... args) {
 
-            Log.d("aaaa","antes1 "+args[0]);
+            Log.d("message received ",""+args[0]);
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -395,7 +390,6 @@ public class ChatFragment extends Fragment {
 
                     Attachment attachment = new Attachment();
                     if(gsonObject.has("attachment") && !gsonObject.get("attachment").isJsonNull()){
-                        Log.d("si tiene attachment", " jojojoj");
                         attachment = Attachment.parseAttachment(gsonObject.get("attachment").getAsJsonObject());
                     }
                     attachment.save();
@@ -405,7 +399,6 @@ public class ChatFragment extends Fragment {
                         addMessage(receiveMessage);
                     }else{
                         chatReceiver = ChatUtilsMethods.getChatFromNewMessage(gsonObject);
-                        Log.e("esssssss","esssss "+gsonObject);
                     }
 
                     chatReceiver.setLastMessage(receiveMessage.getUsername()+": "+receiveMessage.getMessage());
@@ -417,9 +410,6 @@ public class ChatFragment extends Fragment {
 
                     if(currentChat != chatReceiver){
                         ChatUtilsMethods.createNewMessageNotification(getActivity(),chatReceiver, receiveMessage);
-
-                        Log.e("esssssss","esssss "+gsonObject);
-
                     }
 
                 }
@@ -466,7 +456,7 @@ public class ChatFragment extends Fragment {
         if(userChoosenTask.equals("Take Photo")){
             intent.putExtra("imageData",data.getExtras());
         }else if(userChoosenTask.equals("Choose from Library")){
-            Log.d("data of media ", "aaaa "+data.getData());
+            Log.d("data of media: ", ""+data.getData());
             intent.setData(data.getData());
         }
         startActivityForResult(intent, EDIT_IMAGE);
@@ -483,11 +473,11 @@ public class ChatFragment extends Fragment {
                 }
                 else if(requestCode == EDIT_IMAGE){
                     Bundle extras = data.getExtras();
-                    Log.d("aaaaaa","aaaaaa"+extras);
+                    Log.d("activity result :"," "+extras);
                     newImageUri = Uri.parse(extras.getString("result"));
                     messageToSend = extras.getString("message");
                     String typeOfFile = extras.getString("typeFile");
-                    Log.d("aaaaa","aaaaaaa "+newImageUri);
+                    Log.d("activity result :","imageUri "+newImageUri);
 
                     Message message = new Message.Builder(Message.TYPE_MESSAGE).username(mUsername).message(messageToSend).build();
                     message.setChat(currentChat);

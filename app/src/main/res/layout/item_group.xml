@@ -27,7 +27,6 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ty"
             android:id="@+id/tv_last_message"
             android:textColor="@android:color/white" />
     </LinearLayout>

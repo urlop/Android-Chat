@@ -14,7 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Name Group"
+        android:text="@string/label_name_group"
         android:id="@+id/textView" />
 
     <EditText
@@ -28,7 +28,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Create"
+        android:text="@string/btn_create_group"
         android:id="@+id/btn_create"
         android:layout_gravity="center_horizontal" />
 </LinearLayout>

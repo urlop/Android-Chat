@@ -50,7 +50,6 @@ public class CreateUserActivity extends Activity {
         btn_create.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("aaaa","aaaa");
                 String username = et_username.getText().toString();
                 createUser(username);
             }
